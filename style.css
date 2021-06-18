@@ -1,0 +1,44 @@
+
+/* Styling resets and new defaults*/
+* {
+    margin: 0 auto;
+    padding: 0;
+    transform-box: border-box;
+}
+
+html {
+    height: 100vh;
+    font-size: 20px;
+    line-height: 1.5;
+    letter-spacing: 0.04rem;
+    text-align: center;
+}
+
+body {
+    height: 100vh;
+    background-color: #3C896D;
+    overflow: hidden;
+}
+
+header {
+    position: fixed;
+    font-size: 2vh;
+    width: 100%;
+    top: 5vh;
+    left: 0;
+    color: white;
+}
+
+main {
+    margin: 5vh auto;
+    height: 90vh;
+    width: 90%;
+    background-color: #4FB286;
+}
+
+canvas {
+    margin: 8vh auto;
+    height: 72vh;
+    width: 80%;
+    background-color: white;
+}
