@@ -27,6 +27,7 @@ header {
     top: 5vh;
     left: 0;
     color: white;
+    user-select: none;
 }
 
 main {

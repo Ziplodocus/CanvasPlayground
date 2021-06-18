@@ -12,7 +12,7 @@ class Particle {
     constructor(xPosition,yPosition) {
         this._x = xPosition;
         this._y = yPosition;
-        this._speed = 1;
+        this._speed = 3;
         this._direction = Math.random() * 2 * pi;
         this._size = Math.floor(9 * Math.random() + 1);
     }
@@ -26,10 +26,10 @@ class Particle {
     bounce(edge) {
         switch (edge) {
             case 'horizontal':
-                this._direction = (2 * pi - this.direction) % 2 * pi;
+                this._direction = (2 * pi - this.direction);
                 break
             case 'vertical':
-                this._direction = (pi - this.direction) % 2 * pi;
+                this._direction = (pi - this.direction);
                 break
         }
     }
@@ -50,11 +50,9 @@ class Particle {
 
 function setContext() {
     ctx.lineWidth = 0.2;
-    ctx.fillStyle = '#50FFB1';
+    ctx.fillStyle = 'rba(0, 0, 0, 50)';
     ctx.strokeStyle = 'hsla(0, 0%, 0%, 50%)';
-    ctx.shadowBlur = 0.1;
-    ctx.shadowColor = 'hlsa(0, 20%, 0%, 80%)';
-    ctx.shadowOffsetX = 0.1;
+
     ctx.save();
 }
 
@@ -85,7 +83,7 @@ function nextFrame() {
     }
 }
 
-setInterval(nextFrame, 10);
+setInterval(nextFrame, 1);
 
 setContext();
 canvas.addEventListener('click', generateParticle);
