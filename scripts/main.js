@@ -2,26 +2,26 @@
 const canvas = document.getElementById('playground');
 const ctx = canvas.getContext('2d');
 const boundary = canvas.getBoundingClientRect();
-console.log(boundary);
-console.log(canvas.height, canvas.width);
 const particles = [];
 const pi = Math.PI;
 
 class Particle {
 
-    constructor(xPosition,yPosition) {
+    constructor(xPosition, yPosition) {
         this._x = xPosition;
         this._y = yPosition;
-        this._speed = 3;
+        this._speed = Math.floor(9 * Math.random() + 1);
         this._direction = Math.random() * 2 * pi;
-        this._size = Math.floor(9 * Math.random() + 1);
+        this._radius = Math.floor(9 * Math.random() + 1);
+        this._vicinity = 200;
     }
 
-    get x() { return this._x}
-    get y() { return this._y}
-    get speed() { return this._speed}
-    get direction() { return this._direction}
-    get size() { return this._size}
+    get x() { return this._x }
+    get y() { return this._y }
+    get speed() { return this._speed }
+    get direction() { return this._direction }
+    get radius() { return this._radius }
+    get vicinity() { return this._vicinity }
 
     bounce(edge) {
         switch (edge) {
@@ -36,7 +36,7 @@ class Particle {
 
     render(context) {
         context.beginPath()
-        context.arc(this.x, this.y, this.size, 0, 2 * Math.PI, false);
+        context.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         context.fill()
     }
 
@@ -46,12 +46,29 @@ class Particle {
         this._x = this.x + xComponent;
         this._y = this.y + yComponent;
     }
+
+    renderEdge(p, context) {
+
+        const a = this.x - p.x;
+        const b = this.y - p.y;
+        const distance = Math.floor(Math.sqrt(a**2 + b**2));
+        
+        if(distance < this.vicinity) {
+            const alpha = 0.8 - (distance / (this.vicinity / 0.8));
+            context.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            context.lineWidth = Math.sqrt(this.radius + p.radius);
+            context.beginPath();
+            context.moveTo(this.x, this.y);
+            context.lineTo(p.x, p.y);
+            context.stroke()
+        }
+    }
 }
 
 function setContext() {
-    ctx.lineWidth = 0.2;
-    ctx.fillStyle = 'rba(0, 0, 0, 50)';
-    ctx.strokeStyle = 'hsla(0, 0%, 0%, 50%)';
+    ctx.lineWidth = 1;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.strokeStyle = 'hsla(0, 0, 100%, 0.5)';
 
     ctx.save();
 }
@@ -69,10 +86,11 @@ function generateParticle(event) {
 
 function nextFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (particle of particles) {
+    for (let i=0; i < particles.length; i++) {
+        let particle = particles[i];
         particle.move();
-        let withinVertical = (particle.x < canvas.width) && (particle.x > 0);
-        let withinHorizontal = (particle.y < canvas.height) && (particle.y > 0);
+        let withinVertical = (particle.x + particle.radius < canvas.width) && (particle.x - particle.radius > 0);
+        let withinHorizontal = (particle.y + particle.radius < canvas.height) && (particle.y - particle.radius > 0);
         if(!withinVertical) {
             particle.bounce('vertical')
         }
@@ -80,10 +98,14 @@ function nextFrame() {
             particle.bounce('horizontal')
         }
         particle.render(ctx);
+
+        for (let j = i-1; j >= 0; j--) {
+            particle.renderEdge(particles[j], ctx)
+        }
     }
 }
 
-setInterval(nextFrame, 1);
-
 setContext();
+setInterval(nextFrame, 50);
+
 canvas.addEventListener('click', generateParticle);
