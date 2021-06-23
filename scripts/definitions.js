@@ -1,23 +1,38 @@
 const canvas = document.getElementById('playground');
 const ctx = canvas.getContext('2d');
-const boundary = canvas.getBoundingClientRect();
+let boundary = canvas.getBoundingClientRect();
 const pi = Math.PI;
 const resolutionModifier = 3;
+const particles = [];
 
 const mouse = {
     x: 0,
     y: 0,
+    cx: 0,
+    cy: 0,
     inCanvas() {
-        let inX = (this.x > boundary.left) && (this.x < window.innerWidth - boundary.right) ? true : false;
-        let inY = (this.y > boundary.top) && (this.y < window.innerHeight - boundary.bottom) ? true : false;
+        let inX = (this.x > boundary.left) && ((this.cx / resolutionModifier) + boundary.left < boundary.right) ? true : false;
+        let inY = (this.y > boundary.top) && ((this.cy / resolutionModifier) + boundary.top < boundary.bottom) ? true : false;
         return inY && inX ? true : false;
     },
     render() {
         if(this.inCanvas()) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
-            ctx.beginPath()
-            ctx.arc(this.x, this.y, 30, 0,  2*pi);
-            ctx.fill()
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            particles.forEach(p => {
+                const a = this.cx - p.x;
+                const b = this.cy - p.y;
+                const distance = Math.floor(Math.sqrt(a**2 + b**2));
+                
+                if(distance < 1.3 * p.vicinity) {
+                    const alpha = 0.8 - (distance / (1.3 * p.vicinity / 0.8));
+                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+                    ctx.lineWidth = 1 * p.radius;
+                    ctx.beginPath();
+                    ctx.moveTo(this.cx, this.cy);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                }
+            })
         }
     }
 };
@@ -28,10 +43,10 @@ class Particle {
     constructor(xPosition, yPosition) {
         this._x = xPosition;
         this._y = yPosition;
-        this._radius = Math.floor(8 * Math.random() + 2);
-        this._speed = 4 - (this._radius/4);
+        this._radius = Math.floor(8 * Math.random() + 3);
+        this._speed = 1.5 - (this._radius/8);
         this._direction = Math.random() * 2 * pi;
-        this._vicinity = 300;
+        this._vicinity = 100 * resolutionModifier;
     }
 
     get x() { return this._x }
@@ -89,6 +104,7 @@ class Particle {
     }
 
     render() {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3';
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         ctx.fill()
@@ -104,7 +120,7 @@ class Particle {
             const distance = Math.floor(Math.sqrt(a**2 + b**2));
             
             if(distance < this.vicinity) {
-                const alpha = 0.7 - (distance / (this.vicinity / 0.7));
+                const alpha = 0.5 - (distance / (this.vicinity / 0.5));
                 ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
                 ctx.lineWidth = Math.sqrt(this.radius + p.radius);
                 ctx.beginPath();
@@ -115,5 +131,3 @@ class Particle {
         }
     }
 }
-
-const particles = [new Particle(100,100)];

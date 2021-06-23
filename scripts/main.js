@@ -7,12 +7,15 @@ function setctx() {
 }
 
 function moveCursor(event) {
-    mouse.x = (event.clientX - boundary.left) * resolutionModifier;
-    mouse.y = (event.clientY - boundary.top) * resolutionModifier;
+    boundary = canvas.getBoundingClientRect();
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+    mouse.cx = (event.clientX - boundary.left) * resolutionModifier;
+    mouse.cy = (event.clientY - boundary.top) * resolutionModifier;
 }
 
 function generateParticle(event) {
-    const newParticle = new Particle(mouse.x, mouse.y);
+    const newParticle = new Particle(mouse.cx, mouse.cy);
     particles.push(newParticle);
     newParticle.render();
 }
@@ -40,13 +43,13 @@ function nextFrame() {
             particle.bounce('horizontal')
         }
         particle.move();
-        particle.render(ctx);  
+        particle.render();  
     })
     checkCollisionsAndDrawEdges();
     
 }
 
-setInterval(nextFrame, 15);
+setInterval(nextFrame, 1);
 
 canvas.addEventListener('click', generateParticle);
-canvas.addEventListener('mousemove', moveCursor);
+window.addEventListener('mousemove', moveCursor);
