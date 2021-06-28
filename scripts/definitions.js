@@ -1,3 +1,4 @@
+
 const canvas = document.getElementById('playground');
 const ctx = canvas.getContext('2d');
 let boundary = canvas.getBoundingClientRect();
@@ -14,29 +15,8 @@ const mouse = {
         let inX = (this.x > boundary.left) && ((this.cx / resolutionModifier) + boundary.left < boundary.right) ? true : false;
         let inY = (this.y > boundary.top) && ((this.cy / resolutionModifier) + boundary.top < boundary.bottom) ? true : false;
         return inY && inX ? true : false;
-    },
-    render() {
-        if(this.inCanvas()) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            particles.forEach(p => {
-                const a = this.cx - p.x;
-                const b = this.cy - p.y;
-                const distance = Math.floor(Math.sqrt(a**2 + b**2));
-                
-                if(distance < 1.3 * p.vicinity) {
-                    const alpha = 0.8 - (distance / (1.3 * p.vicinity / 0.8));
-                    ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-                    ctx.lineWidth = 1 * p.radius;
-                    ctx.beginPath();
-                    ctx.moveTo(this.cx, this.cy);
-                    ctx.lineTo(p.x, p.y);
-                    ctx.stroke();
-                }
-            })
-        }
     }
 };
-
 
 class Particle {
 
@@ -44,7 +24,7 @@ class Particle {
         this._x = xPosition;
         this._y = yPosition;
         this._radius = Math.floor(8 * Math.random() + 3);
-        this._speed = 1.5 - (this._radius/8);
+        this._speed = 2.2 - (this._radius/5);
         this._direction = Math.random() * 2 * pi;
         this._vicinity = 100 * resolutionModifier;
     }
@@ -75,8 +55,8 @@ class Particle {
                 const isCollision = (distance <= radii);
                 
                 if(isCollision) {
-
                     let anglePerp = Math.acos(Math.abs(xDiff/radii));
+
                     if(-xDiff*yDiff > 0) {
                         anglePerp = -anglePerp;
                     }
@@ -85,22 +65,22 @@ class Particle {
                     }
 
                     this._direction = anglePerp;
-
                     //currently bouncing off each other at the perpendicular
                 }
             }
-        })
-    }
+            else {
 
-    bounce(edge) {
-        switch (edge) {
-            case 'horizontal':
-                this._direction = -this.direction;
-                break
-            case 'vertical':
-                this._direction = pi - this.direction;
-                break
-        }
+                let withinVertical = (this.x + this.radius < canvas.width) && (this.x - this.radius > 0);
+                let withinHorizontal = (this.y + this.radius < canvas.height) && (this.y - this.radius > 0);
+                
+                if(!withinVertical) {
+                    this._direction = pi - this.direction;
+                }
+                if(!withinHorizontal) {
+                    this._direction = -this.direction;
+                }
+            }
+        })
     }
 
     render() {
@@ -110,14 +90,28 @@ class Particle {
         ctx.fill()
     }
 
-    renderEdge() {
+    renderEdges() {
         let index = particles.indexOf(this);
         
+        let a = mouse.cx - this.x;
+        let b = mouse.cy - this.y;
+        let distance = Math.floor(Math.sqrt(a**2 + b**2));
+
+        if(mouse.inCanvas() && (distance < 1.3 * this.vicinity)) {
+            const alpha = 0.8 - (distance / (1.3 * this.vicinity / 0.8));
+            ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.lineWidth =  0.5 * this.radius;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(mouse.cx, mouse.cy);
+            ctx.stroke();
+        }
+
         for (let i = index -1; i >= 0; i--) {
             let p = particles[i];
-            const a = this.x - p.x;
-            const b = this.y - p.y;
-            const distance = Math.floor(Math.sqrt(a**2 + b**2));
+            a = this.x - p.x;
+            b = this.y - p.y;
+            distance = Math.floor(Math.sqrt(a**2 + b**2));
             
             if(distance < this.vicinity) {
                 const alpha = 0.5 - (distance / (this.vicinity / 0.5));
