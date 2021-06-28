@@ -84,7 +84,7 @@ class Particle {
     }
 
     render() {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.2';
         ctx.beginPath()
         ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
         ctx.fill()
@@ -98,7 +98,7 @@ class Particle {
         let distance = Math.floor(Math.sqrt(a**2 + b**2));
 
         if(mouse.inCanvas() && (distance < 1.3 * this.vicinity)) {
-            const alpha = 0.8 - (distance / (1.3 * this.vicinity / 0.8));
+            const alpha = 0.5 - (distance / (1.3 * this.vicinity / 0.5));
             ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
             ctx.lineWidth =  0.5 * this.radius;
             ctx.beginPath();
@@ -114,7 +114,7 @@ class Particle {
             distance = Math.floor(Math.sqrt(a**2 + b**2));
             
             if(distance < this.vicinity) {
-                const alpha = 0.5 - (distance / (this.vicinity / 0.5));
+                const alpha = 0.2 - (distance / (this.vicinity / 0.2));
                 ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
                 ctx.lineWidth = Math.sqrt(this.radius + p.radius);
                 ctx.beginPath();
