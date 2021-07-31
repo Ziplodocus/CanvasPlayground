@@ -31,4 +31,4 @@ function generateParticle(event) {
 canvas.addEventListener('click', generateParticle);
 window.addEventListener('mousemove', moveCursor);
 
-setInterval(nextFrame, 25);
+setInterval(nextFrame, 16.6);

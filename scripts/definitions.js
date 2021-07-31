@@ -7,8 +7,9 @@ const pi = Math.PI;
 //Multiplier to make the canvas higher resolution, helps with sharpness
 const resolutionModifier = 3;
 
+//Defining some default particles at the four corners
+const particles = [new Particle(100,100), new Particle(canvas.width - 100, canvas.height - 100), new Particle(100, canvas.height - 100), new Particle(canvas.width - 100, 100)];
 //Restraints on particle properties
-const particles = [];
 const minSpeed = 0.5;
 const maxSpeed = 3;
 const minSize = 5;
@@ -56,17 +57,15 @@ function avgColor(color1, color2, customOpacity) {
     return newColor
 }
 
-avgColor('rgba(0,0,0,0)', 'rgba(250, 250, 250, 06)');
-
+//Particle class dictates default particle properties, somewhat random, limited by variables declared at top
 class Particle {
     constructor(xPosition, yPosition) {
         this._x = xPosition;
         this._y = yPosition;
         this._radius = Math.floor((maxSize - minSize) * Math.random() + minSize);
-        //maxSpeed 2 = minspeed 1
         this._speed = maxSpeed - (this.radius / maxSize)*(maxSpeed-minSpeed) + minSpeed;
         this._direction = Math.random() * 2 * pi;
-        this._vicinity = 100 * resolutionModifier;
+        this._vicinity = 150 * resolutionModifier;
         this._color = 'rgba('+randHue()+', '+randHue()+', '+randHue()+', 0.8)';
     }
 
@@ -128,7 +127,7 @@ class Particle {
     render() {
         ctx.fillStyle = this.color;
         ctx.beginPath()
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+        ctx.arc(this.x, this.y, this.radius, 0, 2 * pi, false);
         ctx.fill()
     }
 
