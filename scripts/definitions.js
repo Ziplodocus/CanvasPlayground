@@ -14,6 +14,7 @@ const maxSpeed = 3;
 const minSize = 5;
 const maxSize = 13;
 
+//Object to track position of the mouse and determine whether it is in the canvas.
 const mouse = {
     x: 0,
     y: 0,
