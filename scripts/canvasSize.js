@@ -41,4 +41,4 @@ function resize() {
 
 resizeCanvas();
 window.addEventListener('resize', resize);
-particles.push();
+particles.push(new Particle(100,100), new Particle(canvas.width - 100, canvas.height - 100), new Particle(100, canvas.height - 100), new Particle(canvas.width - 100, 100));

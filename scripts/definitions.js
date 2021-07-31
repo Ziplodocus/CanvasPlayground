@@ -8,7 +8,7 @@ const pi = Math.PI;
 const resolutionModifier = 3;
 
 //Defining some default particles at the four corners
-const particles = [new Particle(100,100), new Particle(canvas.width - 100, canvas.height - 100), new Particle(100, canvas.height - 100), new Particle(canvas.width - 100, 100)];
+const particles = [];
 //Restraints on particle properties
 const minSpeed = 0.5;
 const maxSpeed = 3;
