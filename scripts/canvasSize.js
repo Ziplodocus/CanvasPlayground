@@ -36,7 +36,7 @@ function resizeCanvas() {
 
 function resize() {
     clearTimeout(resizeId);
-    resizeId = setTimeout(resizeCanvas, 500);
+    resizeId = setTimeout(resizeCanvas, 300);
 }
 
 resizeCanvas();

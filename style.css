@@ -9,6 +9,7 @@
 html {
     height: 100vh;
     font-size: 20px;
+    font-family: sans-serif;
     line-height: 1.5;
     letter-spacing: 0.04rem;
     text-align: center;
@@ -16,7 +17,7 @@ html {
 
 body {
     height: 100vh;
-    background-color: #3C896D;
+    background-color: #111;
     overflow: hidden;
 }
 
@@ -24,22 +25,22 @@ header {
     position: fixed;
     font-size: 2vh;
     width: 100%;
-    top: 5vh;
+    top: 3vh;
     left: 0;
     color: white;
     user-select: none;
 }
 
 main {
-    margin: 5vh auto;
-    height: 90vh;
-    width: 90%;
-    background-color: #4FB286;
+    margin: 3vh auto;
+    height: 94vh;
+    width: 94%;
+    background-color: #333;
 }
 
 canvas {
-    margin: 8vh auto;
-    height: 72vh;
-    width: 80%;
-    background-color: hsl(253, 64%, 20%);
+    margin: 5vh auto;
+    height: 84vh;
+    width: 90%;
+    background-color: hsl(253, 64%, 100%);
 }

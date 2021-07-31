@@ -1,15 +1,8 @@
 
-function setctx() {
-    ctx.lineWidth = 1;
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.strokeStyle = 'hsla(0, 0, 100%, 0.5)';
-    ctx.save();
-}
-
 function nextFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setctx();
 
+    //Loops need to be separate, so that both particles detect the collision
     particles.forEach( particle => {
         particle.move();
         particle.render();  
@@ -38,4 +31,4 @@ function generateParticle(event) {
 canvas.addEventListener('click', generateParticle);
 window.addEventListener('mousemove', moveCursor);
 
-setInterval(nextFrame, 20);
+setInterval(nextFrame, 25);
