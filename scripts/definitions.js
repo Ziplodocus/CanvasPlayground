@@ -28,6 +28,7 @@ const mouse = {
     }
 };
 
+//Color class contains the various properties of the color and handy functions for manually altering when required
 class Color {
     constructor(opacity = 0.8) {
         this._r = Math.random() * 255;
@@ -35,6 +36,7 @@ class Color {
         this._b = Math.random() * 255;
         this._a = opacity;
     }
+    //Are these getters and setters pointless? should setters be named differently?
     get r() {return this._r}
     get g() {return this._g}
     get b() {return this._b}
@@ -45,8 +47,10 @@ class Color {
     set b(bl) {this._b = bl;}
     set a(al) {this._a = al;}
 
+    //returns the rgba version of the color, with a parameter option to manually set the opacity
     rgba(opacity = this.a) {return `rgba(${this.r}, ${this.g}, ${this.b}, ${opacity})`}
 
+    //returns a new color from the average values of an array of other colors,
     static avgColors(colorArr) {
         let vals = {r: [], g: [], b: []};
         let newVals = {r: 0, g: 0, b: 0};
@@ -89,6 +93,7 @@ class Particle {
     get vicinity() { return this._vicinity }
     get color() { return this._color }
 
+    //Changes the x and y coordinates based on speed and the direction of the particle
     move() {
         let xComponent = this.speed * Math.cos(this.direction);
         let yComponent = this.speed * Math.sin(this.direction);
@@ -96,13 +101,13 @@ class Particle {
         this._y = this.y + yComponent;
     }
 
+    //Changes the particles direction when a collision is detected
+    //Could reduce number of loops (maybe significantly) by letting this function redirect both particles
     collide() {
         particles.forEach(p => {
             if(this !== p) {
-
                 const xDiff = p.x - this.x;
                 const yDiff = p.y - this.y;
-
                 const distance = Math.sqrt(xDiff**2 + yDiff**2);
                 const radii = this.radius + p.radius;
                 const isCollision = (distance <= radii);
@@ -122,7 +127,7 @@ class Particle {
                 }
             }
             else {
-
+                //Handles bouncing off of the container
                 let withinVertical = (this.x + this.radius < canvas.width) && (this.x - this.radius > 0);
                 let withinHorizontal = (this.y + this.radius < canvas.height) && (this.y - this.radius > 0);
                 
@@ -136,6 +141,7 @@ class Particle {
         })
     }
 
+    //Draws the particle onto the canvas
     render() {
         ctx.fillStyle = this.color.rgba();
         ctx.strokeStyle = this.lineColor.rgba();
@@ -147,6 +153,7 @@ class Particle {
         ctx.stroke();
     }
 
+    //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
         let index = particles.indexOf(this);
         
