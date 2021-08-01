@@ -16,12 +16,12 @@ const options = {
     edges: true,
     fill: true,
     outline: true,
-    minSpeed: 0.5,
-    maxSpeed: 1,
-    minSize: 5,
+    minSpeed: 0.1,
+    maxSpeed: 4,
+    minSize: 3,
     maxSize: 30,
-    vicinity: 140,
-    initialParticles: 50,
+    vicinity: 200,
+    initialParticles: 20,
 }
 
 //Getting the size of the canvas
@@ -181,7 +181,7 @@ class Particle {
                 const alpha = 1 - (distance / (1.5 * options.vicinity));
                 ctx.lineCap = "round";
                 ctx.strokeStyle = this.lineColor.rgba(alpha);
-                ctx.lineWidth = (1.5 * options.vicinity - distance) * this.radius / options.vicinity ;
+                ctx.lineWidth = Math.sqrt(this.radius) * Math.log((options.vicinity - distance + 1));
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
                 ctx.lineTo(mouse.cx, mouse.cy);
@@ -200,7 +200,7 @@ class Particle {
                     const alpha = options.opacity - (distance / (options.vicinity / options.opacity));
                     ctx.strokeStyle = (Color.avgColors([this.lineColor, p.lineColor])).rgba(alpha);
                     ctx.lineCap = "round";
-                    ctx.lineWidth = (options.vicinity - distance) * (this.radius + p.radius) / options.vicinity ;
+                    ctx.lineWidth = Math.sqrt(this.radius + p.radius)/2 * Math.log((options.vicinity - distance + 1));
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(p.x, p.y);
