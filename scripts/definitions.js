@@ -10,10 +10,28 @@ const resolutionModifier = 2;
 //Defining some default particles at the four corners
 const particles = [];
 //Restraints on particle properties
-const minSpeed = 0.5;
-const maxSpeed = 3;
-const minSize = 3;
-const maxSize = 20;
+const options = {
+    opacity: 0.8,
+    mouseEdges: true,
+    edges: true,
+    fill: true,
+    outline: true,
+    minSpeed: 0.5,
+    maxSpeed: 1,
+    minSize: 5,
+    maxSize: 30,
+    vicinity: 140,
+    initialParticles: 50,
+}
+
+//Getting the size of the canvas
+let canvasSize = {
+    width: getComputedStyle(canvas).width.replace('px',''),
+    height: getComputedStyle(canvas).height.replace('px',''),
+    area() {
+        return this.width * this.height
+    }
+}
 
 //Object to track position of the mouse and determine whether it is in the canvas.
 const mouse = {
@@ -30,7 +48,7 @@ const mouse = {
 
 //Color class contains the various properties of the color and handy functions for manually altering when required
 class Color {
-    constructor(opacity = 0.8) {
+    constructor(opacity = options.opacity) {
         this._r = Math.random() * 255;
         this._g = Math.random() * 255;
         this._b = Math.random() * 255;
@@ -77,10 +95,9 @@ class Particle {
     constructor(xPosition, yPosition) {
         this._x = xPosition;
         this._y = yPosition;
-        this._radius = Math.floor((maxSize - minSize) * Math.random() + minSize);
-        this._speed = maxSpeed - (this.radius / maxSize)*(maxSpeed-minSpeed) + minSpeed;
+        this._radius = Math.floor((options.maxSize - options.minSize) * Math.random() + options.minSize);
+        this._speed = options.maxSpeed - (this.radius / options.maxSize)*(options.maxSpeed-options.minSpeed) + options.minSpeed;
         this._direction = Math.random() * 2 * pi;
-        this._vicinity = 120 * resolutionModifier;
         this._color = new Color();
         this.lineColor = new Color();
     }
@@ -90,7 +107,6 @@ class Particle {
     get speed() { return this._speed }
     get direction() { return this._direction }
     get radius() { return this._radius }
-    get vicinity() { return this._vicinity }
     get color() { return this._color }
 
     //Changes the x and y coordinates based on speed and the direction of the particle
@@ -149,44 +165,47 @@ class Particle {
         ctx.lineCap = "round";
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * pi, false);
-        // ctx.fill();
-        ctx.stroke();
+        if(options.fill) {ctx.fill()};
+        if(options.outline) {ctx.stroke()};
     }
 
     //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
         let index = particles.indexOf(this);
-        
-        let a = mouse.cx - this.x;
-        let b = mouse.cy - this.y;
-        let distance = Math.floor(Math.sqrt(a**2 + b**2));
+        if(options.mouseEdges) {
+            let a = mouse.cx - this.x;
+            let b = mouse.cy - this.y;
+            let distance = Math.floor(Math.sqrt(a**2 + b**2));
 
-        if(mouse.inCanvas() && (distance < 1.5 * this.vicinity)) {
-            const alpha = 1 - (distance / (1.5 * this.vicinity));
-            ctx.lineCap = "round";
-            ctx.strokeStyle = this.lineColor.rgba(alpha);
-            ctx.lineWidth =  0.5 * this.radius;
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(mouse.cx, mouse.cy);
-            ctx.stroke();
-        }
-
-        for (let i = index -1; i >= 0; i--) {
-            let p = particles[i];
-            a = this.x - p.x;
-            b = this.y - p.y;
-            distance = Math.floor(Math.sqrt(a**2 + b**2));
-            
-            if(distance < this.vicinity) {
-                const alpha = 0.6 - (distance / (this.vicinity / 0.6));
-                ctx.strokeStyle = (Color.avgColors([this.lineColor, p.lineColor])).rgba(alpha);
+            if(mouse.inCanvas() && (distance < 1.5 * options.vicinity)) {
+                const alpha = 1 - (distance / (1.5 * options.vicinity));
                 ctx.lineCap = "round";
-                ctx.lineWidth = Math.sqrt(this.radius + p.radius);
+                ctx.strokeStyle = this.lineColor.rgba(alpha);
+                ctx.lineWidth = (1.5 * options.vicinity - distance) * this.radius / options.vicinity ;
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
-                ctx.lineTo(p.x, p.y);
-                ctx.stroke()               
+                ctx.lineTo(mouse.cx, mouse.cy);
+                ctx.stroke();
+            }
+        }
+
+        if(options.edges) {
+            for (let i = index -1; i >= 0; i--) {
+                let p = particles[i];
+                let a = this.x - p.x;
+                let b = this.y - p.y;
+                let distance = Math.floor(Math.sqrt(a**2 + b**2));
+                
+                if(distance < options.vicinity) {
+                    const alpha = options.opacity - (distance / (options.vicinity / options.opacity));
+                    ctx.strokeStyle = (Color.avgColors([this.lineColor, p.lineColor])).rgba(alpha);
+                    ctx.lineCap = "round";
+                    ctx.lineWidth = (options.vicinity - distance) * (this.radius + p.radius) / options.vicinity ;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke()               
+                }
             }
         }
     }
