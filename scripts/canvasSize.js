@@ -8,7 +8,6 @@ let canvasSize = {
 }
 
 function resizeCanvas() {
-
     let newCanvasSize = {
         width: getComputedStyle(canvas).width.replace('px',''),
         height: getComputedStyle(canvas).height.replace('px',''),
@@ -17,7 +16,6 @@ function resizeCanvas() {
         }
     }
 
-
     particles.forEach(particle => {
         particle._x = particle.x * (newCanvasSize.width / canvasSize.width);
         particle._y = particle.y * (newCanvasSize.height / canvasSize.height);
@@ -25,13 +23,10 @@ function resizeCanvas() {
         particle._vicinity * sizeRatio;
         particle._radius * sizeRatio;
     })
- 
 
     canvas.height = Math.floor(resolutionModifier * newCanvasSize.height);
     canvas.width = Math.floor(resolutionModifier * newCanvasSize.width);
-
     canvasSize = newCanvasSize;
-    
 }
 
 function resize() {

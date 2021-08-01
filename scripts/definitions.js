@@ -5,15 +5,15 @@ let boundary = canvas.getBoundingClientRect();
 const pi = Math.PI;
 
 //Multiplier to make the canvas higher resolution, helps with sharpness
-const resolutionModifier = 3;
+const resolutionModifier = 2;
 
 //Defining some default particles at the four corners
 const particles = [];
 //Restraints on particle properties
 const minSpeed = 0.5;
 const maxSpeed = 3;
-const minSize = 5;
-const maxSize = 13;
+const minSize = 3;
+const maxSize = 20;
 
 //Object to track position of the mouse and determine whether it is in the canvas.
 const mouse = {
@@ -28,33 +28,44 @@ const mouse = {
     }
 };
 
-//Maybe worth making a color class? object etc.
-function randHue() {return Math.random() * 250};
-function getColorValues(color) {
-    return color.split('(')[1].split(')')[0].split(',').map(x=>+x);
-}
-function setColorValues(colorVals) {
-    return 'rgb('+colorVals[0]+', '+colorVals[1]+', '+colorVals[2]+', '+colorVals[3]+')'
-}
+class Color {
+    constructor(opacity = 0.8) {
+        this._r = Math.random() * 255;
+        this._g = Math.random() * 255;
+        this._b = Math.random() * 255;
+        this._a = opacity;
+    }
+    get r() {return this._r}
+    get g() {return this._g}
+    get b() {return this._b}
+    get a() {return this._a}
 
-function setOpacity(color, opacity) {
-    let vals = getColorValues(color);
-    vals[3] = opacity;
-    return setColorValues(vals);
-}
+    set r(re) {this._r = re;}
+    set g(gr) {this._g = gr;}
+    set b(bl) {this._b = bl;}
+    set a(al) {this._a = al;}
 
-function avgColor(color1, color2, customOpacity) {
-    let vals1 = getColorValues(color1);
-    let vals2 = getColorValues(color2);
-    
-    let r = (vals1[0] + vals2[0]) / 2;
-    let g = (vals1[1] + vals2[1]) / 2;
-    let b = (vals1[2] + vals2[2]) / 2;
-    let a;
-    customOpacity ? a = customOpacity : a = (vals1[3] + vals2[3]) / 2;
-    
-    let newColor = setColorValues([r,g,b,a]);
-    return newColor
+    rgba(opacity = this.a) {return `rgba(${this.r}, ${this.g}, ${this.b}, ${opacity})`}
+
+    static avgColors(colorArr) {
+        let vals = {r: [], g: [], b: []};
+        let newVals = {r: 0, g: 0, b: 0};
+        let avgCol = new Color();
+        for (let val in vals) {
+            //Pushes all red, green and blue values into separate arrays
+            colorArr.forEach(color => {
+                vals[val].push(color[val])
+            });
+            //Assigning a new color value as sum of squares, then sqrt of the mean
+            vals[val].forEach(value => {
+                newVals[val] += value*value;
+            })
+            newVals[val] = Math.sqrt( newVals[val] / vals[val].length );
+            //Setting the new colors color values as the new ones
+            avgCol[val] = newVals[val];
+        }
+        return avgCol
+    }
 }
 
 //Particle class dictates default particle properties, somewhat random, limited by variables declared at top
@@ -65,8 +76,9 @@ class Particle {
         this._radius = Math.floor((maxSize - minSize) * Math.random() + minSize);
         this._speed = maxSpeed - (this.radius / maxSize)*(maxSpeed-minSpeed) + minSpeed;
         this._direction = Math.random() * 2 * pi;
-        this._vicinity = 150 * resolutionModifier;
-        this._color = 'rgba('+randHue()+', '+randHue()+', '+randHue()+', 0.8)';
+        this._vicinity = 120 * resolutionModifier;
+        this._color = new Color();
+        this.lineColor = new Color();
     }
 
     get x() { return this._x }
@@ -125,10 +137,14 @@ class Particle {
     }
 
     render() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath()
+        ctx.fillStyle = this.color.rgba();
+        ctx.strokeStyle = this.lineColor.rgba();
+        ctx.lineWidth = this.radius / 5;
+        ctx.lineCap = "round";
+        ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, 2 * pi, false);
-        ctx.fill()
+        // ctx.fill();
+        ctx.stroke();
     }
 
     renderEdges() {
@@ -140,7 +156,8 @@ class Particle {
 
         if(mouse.inCanvas() && (distance < 1.5 * this.vicinity)) {
             const alpha = 1 - (distance / (1.5 * this.vicinity));
-            ctx.strokeStyle = setOpacity(this.color, alpha);
+            ctx.lineCap = "round";
+            ctx.strokeStyle = this.lineColor.rgba(alpha);
             ctx.lineWidth =  0.5 * this.radius;
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
@@ -156,7 +173,8 @@ class Particle {
             
             if(distance < this.vicinity) {
                 const alpha = 0.6 - (distance / (this.vicinity / 0.6));
-                ctx.strokeStyle = avgColor(this.color, p.color, alpha);
+                ctx.strokeStyle = (Color.avgColors([this.lineColor, p.lineColor])).rgba(alpha);
+                ctx.lineCap = "round";
                 ctx.lineWidth = Math.sqrt(this.radius + p.radius);
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);

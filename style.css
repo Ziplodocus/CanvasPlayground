@@ -27,7 +27,7 @@ header {
     width: 100%;
     top: 3vh;
     left: 0;
-    color: white;
+    color: #FFF;
     user-select: none;
 }
 
@@ -42,5 +42,5 @@ canvas {
     margin: 5vh auto;
     height: 84vh;
     width: 90%;
-    background-color: hsl(253, 64%, 100%);
+    background-color: #000;
 }
