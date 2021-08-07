@@ -31,8 +31,8 @@ function resize() {
 resizeCanvas();
 window.addEventListener('resize', resize);
 
-for (let i = options.initialParticles; i > 0; i--) {
-    let randX = Math.random() * (canvasSize.width - 2*options.maxSize) * resolutionModifier + options.maxSize;
-    let randY = Math.random() * (canvasSize.height - 2*options.maxSize) * resolutionModifier + options.maxSize;
-    particles.push(new Particle(randX, randY));
-}
+// for (let i = options.initialParticles; i > 0; i--) {
+//     let randX = Math.random() * (canvasSize.width - 2*options.maxSize) * resolutionModifier + options.maxSize;
+//     let randY = Math.random() * (canvasSize.height - 2*options.maxSize) * resolutionModifier + options.maxSize;
+//     particles.push(new Particle(randX, randY));
+// }

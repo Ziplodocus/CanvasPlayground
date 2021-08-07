@@ -14,14 +14,18 @@ const options = {
     opacity: 0.8,
     mouseEdges: true,
     edges: true,
-    fill: true,
+    fill: false,
     outline: true,
-    minSpeed: 0.1,
-    maxSpeed: 4,
-    minSize: 3,
-    maxSize: 30,
+    minSpeed: 1,
+    maxSpeed: 2,
+    minSize: 50,
+    maxSize: 50,
     vicinity: 200,
     initialParticles: 20,
+
+    speed() {
+        return Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed;
+    }
 }
 
 //Getting the size of the canvas
@@ -45,6 +49,36 @@ const mouse = {
         return inY && inX ? true : false;
     }
 };
+
+const vtr = {
+    dot(a, b) {
+        const result = a.reduce((acc, cur, i) => {
+            acc += cur * b[i];
+            return acc;
+        }, 0);
+        return result;
+    },
+    norm(array) {
+        const sumOfSquares = array.reduce((accrue, current) => {
+            accrue += current**2;
+            return accrue;
+        })
+        return Math.sqrt(sumOfSquares);
+    },
+    mult(array, multi) {return array.map(val => val*multi);},
+    add(arrayOfVectors) {
+        let addedVtr = [];
+        let sum;
+        for (let i = 0; i < arrayOfVectors[0].length; i++) {
+            sum = 0;
+            for (let j = 0; j < arrayOfVectors.length; j++) {
+                sum += arrayOfVectors[j][i]
+            }
+            addedVtr.push(sum);
+        }
+        return addedVtr;
+    }
+}
 
 //Color class contains the various properties of the color and handy functions for manually altering when required
 class Color {
@@ -92,96 +126,122 @@ class Color {
 
 //Particle class dictates default particle properties, somewhat random, limited by variables declared at top
 class Particle {
-    constructor(xPosition, yPosition) {
+    constructor( xPosition, yPosition, speed, directionRadeons ) {
         this._x = xPosition;
         this._y = yPosition;
-        this._radius = Math.floor((options.maxSize - options.minSize) * Math.random() + options.minSize);
-        this._speed = options.maxSpeed - (this.radius / options.maxSize)*(options.maxSpeed-options.minSpeed) + options.minSpeed;
-        this._direction = Math.random() * 2 * pi;
+        this._vx = speed * Math.cos(directionRadeons);
+        this._vy = speed * Math.sin(directionRadeons);
         this._color = new Color();
-        this.lineColor = new Color();
+        this._lineColor = new Color();
+        this._radius = options.minSize + (options.maxSize - options.minSize) * ((speed - options.minSpeed) / (options.maxSpeed - options.minSpeed));
     }
 
     get x() { return this._x }
     get y() { return this._y }
-    get speed() { return this._speed }
-    get direction() { return this._direction }
-    get radius() { return this._radius }
+    get vx() { return this._vx }
+    get vy() { return this._vy }
     get color() { return this._color }
+    get lineColor() { return this._lineColor }
+    get radius() { return this._radius }
+    
+    get speed() { return Math.sqrt( this.vx**2 + this.vy**2 ) }
+    get direction() { return Math.acos( this.vx / this.speed ) }
+    get mass() { return 4/3 * pi * this.radius**3 }
+
+
+    set setX( xPos ) { this._x = xPos }
+    set setY( yPos ) { this._y = yPos }
+    set setVx( x_velocity ) { this._vx = x_velocity }
+    set setVy( y_velocity ) { this._vy = y_velocity }
+
 
     //Changes the x and y coordinates based on speed and the direction of the particle
     move() {
-        let xComponent = this.speed * Math.cos(this.direction);
-        let yComponent = this.speed * Math.sin(this.direction);
-        this._x = this.x + xComponent;
-        this._y = this.y + yComponent;
+        this.setX = this.x + this.vx;
+        this.setY = this.y + this.vy;
     }
 
     //Changes the particles direction when a collision is detected
     //Could reduce number of loops (maybe significantly) by letting this function redirect both particles
     collide() {
-        particles.forEach(p => {
-            if(this !== p) {
-                const xDiff = p.x - this.x;
-                const yDiff = p.y - this.y;
-                const distance = Math.sqrt(xDiff**2 + yDiff**2);
-                const radii = this.radius + p.radius;
-                const isCollision = (distance <= radii);
-                
-                if(isCollision) {
-                    let anglePerp = Math.acos(Math.abs(xDiff/radii));
+        for ( let i = particles.indexOf(this)+1; i < particles.length; i++ ) {
+            let p = particles[i];
+            let a = this.x - p.x;
+            let b = this.y - p.y;
+            const distance = Math.hypot(a, b);
+            const radii = this.radius + p.radius;
+            const isCollision = (distance <= radii);
+            
+            if(isCollision) {
+                // if (distance < radii) {
+                //     const angleOfCollision = Math.atan( a / b );
+                //     let ratio = this.radius / radii;
+                //     let inset = distance - radii;
 
-                    if(-xDiff*yDiff > 0) {
-                        anglePerp = -anglePerp;
-                    }
-                    if(Math.sign(xDiff) > 0) {
-                        anglePerp = anglePerp + pi;
-                    }
+                //     this.setX = this.x + ratio * Math.cos(angleOfCollision) * inset;
+                //     this.setY = this.y + ratio * Math.sin(angleOfCollision) * inset;
+                //     p.setX = p.x - (1-ratio) * Math.cos(angleOfCollision) * inset;
+                //     p.setY = p.y - (1-ratio) * Math.sin(angleOfCollision) * inset;
+                // }
 
-                    this._direction = anglePerp;
-                    //currently bouncing off each other at the perpendicular
-                }
-            }
-            else {
-                //Handles bouncing off of the container
-                let withinVertical = (this.x + this.radius < canvas.width) && (this.x - this.radius > 0);
-                let withinHorizontal = (this.y + this.radius < canvas.height) && (this.y - this.radius > 0);
+
+
+                let velociDiff = [this.vx - p.vx, this.vy - p.vy];
+                let posiDiff = [this.x - p.x, this.y - p.y];
+                let velociDiff2 = vtr.mult(velociDiff, -1);
+                let posiDiff2 = vtr.mult(posiDiff, -1);
                 
-                if(!withinVertical) {
-                    this._direction = pi - this.direction;
-                }
-                if(!withinHorizontal) {
-                    this._direction = -this.direction;
-                }
+                // let thisVChange = vtr.mult( posiDiff, -( 2 * p.mass / (this.mass + p.mass) ) * (vtr.dot(velociDiff, posiDiff) / vtr.norm(posiDiff)**2) );
+                // console.log('change: ' + vtr.norm(thisVChange));
+                // let pVChange = vtr.mult( posiDiff2, -( -2 * this.mass / (this.mass + p.mass) ) * (vtr.dot(velociDiff2, posiDiff2) / vtr.norm(posiDiff2)**2) );
+                // let thisV = vtr.add([[this.vx, this.vy], thisVChange]);
+                // let pV = vtr.add([[p.vx, p.vy], pVChange]);
+
+                // this.setVx = thisV[0];
+                // this.setVy = thisV[1];
+                // p.setVx = pV[0];
+                // p.setVy = pV[1];
+                let vxchange = this.vx * Math.cos(Math.atan2(velociDiff[1] / velociDiff[0]));
+                let vychange = this.vy * Math.sin(Math.atan2(velociDiff[1] / velociDiff[0]));
+                let pvxchange = p.vx * Math.cos(Math.atan2(velociDiff2[1] / velociDiff2[0]));
+                let pvychange = p.vy * Math.sin(Math.atan2(velociDiff2[1] / velociDiff2[0]));
+                console.log(vxchange);
+                console.log(vychange);
+
+                [this.setVx, this.setVy, p.setVx, p.setVy] = [vxchange, vychange, pvxchange, pvychange];
             }
-        })
+        }
+        //Handles bouncing off of the container
+        let withinVertical = (this.y + this.radius < canvas.height) && (this.y - this.radius > 0);
+        let withinHorizontal = (this.x + this.radius < canvas.width) && (this.x - this.radius > 0);
+        if(!withinHorizontal) { this.setVx = -this.vx; }
+        if(!withinVertical) { this.setVy = -this.vy; }
     }
 
     //Draws the particle onto the canvas
     render() {
         ctx.fillStyle = this.color.rgba();
         ctx.strokeStyle = this.lineColor.rgba();
-        ctx.lineWidth = this.radius / 5;
-        ctx.lineCap = "round";
+        ctx.lineWidth = this.radius / 4;
+        ctx.lineCap = "butt";
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, 2 * pi, false);
-        if(options.fill) {ctx.fill()};
-        if(options.outline) {ctx.stroke()};
+        ctx.arc( this.x, this.y, this.radius, 0, 2 * pi, false );
+        if( options.fill ) { ctx.fill() };
+        if( options.outline ) { ctx.stroke() };
     }
 
     //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
         let index = particles.indexOf(this);
-        if(options.mouseEdges) {
-            let a = mouse.cx - this.x;
-            let b = mouse.cy - this.y;
-            let distance = Math.floor(Math.sqrt(a**2 + b**2));
-
-            if(mouse.inCanvas() && (distance < 1.5 * options.vicinity)) {
-                const alpha = 1 - (distance / (1.5 * options.vicinity));
+        if( options.mouseEdges ) {
+            let a = this.x - mouse.cx;
+            let b = this.y - mouse.cy;
+            let distance = Math.hypot(a, b);
+            if( mouse.inCanvas() && ( distance < 1.5 * options.vicinity ) ) {
+                const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
                 ctx.lineCap = "round";
                 ctx.strokeStyle = this.lineColor.rgba(alpha);
-                ctx.lineWidth = Math.sqrt(this.radius) * Math.log((options.vicinity - distance + 1));
+                ctx.lineWidth = Math.sqrt(this.radius) * Math.log( options.vicinity - distance * 1.5 + 1 );
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
                 ctx.lineTo(mouse.cx, mouse.cy);
@@ -189,18 +249,18 @@ class Particle {
             }
         }
 
-        if(options.edges) {
-            for (let i = index -1; i >= 0; i--) {
+        if( options.edges ) {
+            for ( let i = index -1; i >= 0; i-- ) {
                 let p = particles[i];
                 let a = this.x - p.x;
                 let b = this.y - p.y;
-                let distance = Math.floor(Math.sqrt(a**2 + b**2));
+                let distance = Math.hypot(a, b);
                 
-                if(distance < options.vicinity) {
-                    const alpha = options.opacity - (distance / (options.vicinity / options.opacity));
-                    ctx.strokeStyle = (Color.avgColors([this.lineColor, p.lineColor])).rgba(alpha);
+                if( distance < options.vicinity ) {
+                    const alpha = options.opacity - ( distance / (options.vicinity / options.opacity) );
+                    ctx.strokeStyle = ( Color.avgColors( [this.lineColor, p.lineColor] ) ).rgba(alpha);
                     ctx.lineCap = "round";
-                    ctx.lineWidth = Math.sqrt(this.radius + p.radius)/2 * Math.log((options.vicinity - distance + 1));
+                    ctx.lineWidth = Math.sqrt(this.radius + p.radius) / 2 * Math.log( options.vicinity - distance + 1 );
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(p.x, p.y);
