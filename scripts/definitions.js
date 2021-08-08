@@ -11,21 +11,23 @@ const resolutionModifier = 2;
 const particles = [];
 //Restraints on particle properties
 const options = {
-    opacity: 0.8,
+    opacity: 0.6,
     mouseEdges: true,
     edges: true,
-    fill: false,
+    fill: true,
     outline: true,
-    minSpeed: 1,
-    maxSpeed: 2,
-    minSize: 50,
+    minSpeed: 0.5,
+    maxSpeed: 5,
+    minSize: 20,
     maxSize: 50,
     vicinity: 200,
-    initialParticles: 20,
+    initialParticles: 15,
 
     speed() {
         return Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed;
-    }
+    },
+
+    direction() { return Math.random() * 2 * pi }
 }
 
 //Getting the size of the canvas
@@ -59,10 +61,10 @@ const vtr = {
         return result;
     },
     norm(array) {
-        const sumOfSquares = array.reduce((accrue, current) => {
+        const sumOfSquares = array.reduce((accrue, current, i) => {
             accrue += current**2;
             return accrue;
-        })
+        }, 0)
         return Math.sqrt(sumOfSquares);
     },
     mult(array, multi) {return array.map(val => val*multi);},
@@ -144,7 +146,7 @@ class Particle {
     get lineColor() { return this._lineColor }
     get radius() { return this._radius }
     
-    get speed() { return Math.sqrt( this.vx**2 + this.vy**2 ) }
+    get speed() { return vtr.norm([this.vx, this.vy]) }
     get direction() { return Math.acos( this.vx / this.speed ) }
     get mass() { return 4/3 * pi * this.radius**3 }
 
@@ -161,87 +163,116 @@ class Particle {
         this.setY = this.y + this.vy;
     }
 
-    //Changes the particles direction when a collision is detected
-    //Could reduce number of loops (maybe significantly) by letting this function redirect both particles
+    //Handles collisions between particles and the container
     collide() {
-        for ( let i = particles.indexOf(this)+1; i < particles.length; i++ ) {
-            let p = particles[i];
-            let a = this.x - p.x;
-            let b = this.y - p.y;
-            const distance = Math.hypot(a, b);
+        for ( let i = particles.indexOf(this) + 1; i < particles.length; i++ ) {
+            const p = particles[i];
+
+            const xDiff = this.x - p.x;
+            const yDiff = this.y - p.y;
+            const perpendicular = [xDiff, yDiff];
+            const distance = vtr.norm(perpendicular);
             const radii = this.radius + p.radius;
+
+            const perpunit = vtr.mult(perpendicular, 1 / vtr.norm(perpendicular));
+            const tangunit = [-perpunit[1], perpunit[0]];
+
             const isCollision = (distance <= radii);
-            
-            if(isCollision) {
-                // if (distance < radii) {
-                //     const angleOfCollision = Math.atan( a / b );
-                //     let ratio = this.radius / radii;
-                //     let inset = distance - radii;
+            const isOverlap = (distance < radii);
 
-                //     this.setX = this.x + ratio * Math.cos(angleOfCollision) * inset;
-                //     this.setY = this.y + ratio * Math.sin(angleOfCollision) * inset;
-                //     p.setX = p.x - (1-ratio) * Math.cos(angleOfCollision) * inset;
-                //     p.setY = p.y - (1-ratio) * Math.sin(angleOfCollision) * inset;
-                // }
-
-
-
-                let velociDiff = [this.vx - p.vx, this.vy - p.vy];
-                let posiDiff = [this.x - p.x, this.y - p.y];
-                let velociDiff2 = vtr.mult(velociDiff, -1);
-                let posiDiff2 = vtr.mult(posiDiff, -1);
+            //Shifts particles to the point of minimal (not zero!) contact if they are overlapped
+            if ( isOverlap ) {
+                const perpangle = Math.atan2(perpunit[1], perpunit[0]);
+                const diff = radii - distance;
+                let ratio;
+                let xadj;
+                let yadj;
                 
-                // let thisVChange = vtr.mult( posiDiff, -( 2 * p.mass / (this.mass + p.mass) ) * (vtr.dot(velociDiff, posiDiff) / vtr.norm(posiDiff)**2) );
-                // console.log('change: ' + vtr.norm(thisVChange));
-                // let pVChange = vtr.mult( posiDiff2, -( -2 * this.mass / (this.mass + p.mass) ) * (vtr.dot(velociDiff2, posiDiff2) / vtr.norm(posiDiff2)**2) );
-                // let thisV = vtr.add([[this.vx, this.vy], thisVChange]);
-                // let pV = vtr.add([[p.vx, p.vy], pVChange]);
+                ratio = this.radius / radii;
+                xadj = ratio * diff * Math.cos(perpangle);
+                yadj = ratio * diff * Math.sin(perpangle);
+                this.setX = this.x + xadj;
+                this.setY = this.y + yadj;
 
-                // this.setVx = thisV[0];
-                // this.setVy = thisV[1];
-                // p.setVx = pV[0];
-                // p.setVy = pV[1];
-                let vxchange = this.vx * Math.cos(Math.atan2(velociDiff[1] / velociDiff[0]));
-                let vychange = this.vy * Math.sin(Math.atan2(velociDiff[1] / velociDiff[0]));
-                let pvxchange = p.vx * Math.cos(Math.atan2(velociDiff2[1] / velociDiff2[0]));
-                let pvychange = p.vy * Math.sin(Math.atan2(velociDiff2[1] / velociDiff2[0]));
-                console.log(vxchange);
-                console.log(vychange);
+                ratio = 1 - ratio;
+                xadj = ratio * diff * Math.cos(perpangle + pi);
+                yadj = ratio * diff * Math.sin(perpangle + pi);
+                p.setX = p.x + xadj;
+                p.setY = p.y + yadj;
+            }
 
-                [this.setVx, this.setVy, p.setVx, p.setVy] = [vxchange, vychange, pvxchange, pvychange];
+            //Handles if this particle collides with another, redirecting both
+            if( isCollision ) {
+                //u1 is the initial velocity of this particle and u2 the initial velocity of the colliding particle
+                const u1 = [this.vx, this.vy];
+                const u2 = [p.vx, p.vy];
+
+                //Projection of initial velocity along the perpendicular and tangent direction of the point of contact
+                const u1perp = vtr.dot(u1, perpunit);
+                const u1tang= vtr.dot(u1, tangunit);
+                const u2perp = vtr.dot(u2, perpunit);
+                const u2tang = vtr.dot(u2, tangunit);
+
+                /* 
+                    New velocity in the direction of the perpendicular 
+                    The velocity tangent to the point of collision does not change,
+                    but the perpendicular does, hence turning the 2dimensional problem 
+                    into a 1dimensional, (1 dimensional collision equation)
+                */
+                let v1perp = ( u1perp * (this.mass - p.mass) + 2 * p.mass * u2perp ) / (this.mass + p.mass) 
+                let v2perp = ( u2perp * (p.mass - this.mass) + 2 * this.mass * u1perp ) / (this.mass + p.mass) 
+
+                //Projecting the perp and tang velocities back onto cartesian coordinates
+                let v1x = vtr.dot( vtr.mult(perpunit, v1perp), [1,0]) + vtr.dot( vtr.mult(tangunit, u1tang), [1,0]);
+                let v1y = vtr.dot( vtr.mult(perpunit, v1perp), [0,1]) + vtr.dot( vtr.mult(tangunit, u1tang), [0,1]);
+                let v2x = vtr.dot( vtr.mult(perpunit, v2perp), [1,0]) + vtr.dot( vtr.mult(tangunit, u2tang), [1,0]);
+                let v2y = vtr.dot( vtr.mult(perpunit, v2perp), [0,1]) + vtr.dot( vtr.mult(tangunit, u2tang), [0,1]);
+
+                //Setting the new velocities on the particles
+                [this.setVx, this.setVy, p.setVx, p.setVy] = [v1x, v1y, v2x, v2y];
             }
         }
         //Handles bouncing off of the container
-        let withinVertical = (this.y + this.radius < canvas.height) && (this.y - this.radius > 0);
-        let withinHorizontal = (this.x + this.radius < canvas.width) && (this.x - this.radius > 0);
-        if(!withinHorizontal) { this.setVx = -this.vx; }
-        if(!withinVertical) { this.setVy = -this.vy; }
+        let exceedHorizontal = (this.x + this.radius > canvas.width) || (this.x - this.radius < 0);
+        let exceedVertical = (this.y + this.radius > canvas.height) || (this.y - this.radius < 0);
+        if(exceedHorizontal) { 
+            // Determines +ve or -ve adjustment based on which wall is touched
+            let adj = this.x - this.radius < 0 ? this.x - this.radius : this.x + this.radius - canvas.width;
+            this.setX = this.x - adj;
+            this.setVx = -this.vx; 
+        }
+        if(exceedVertical) { 
+            let adj = this.y - this.radius < 0 ? this.y - this.radius : this.y + this.radius - canvas.height;
+            this.setY = this.y - adj; 
+            this.setVy = -this.vy; 
+        }
     }
 
     //Draws the particle onto the canvas
     render() {
-        ctx.fillStyle = this.color.rgba();
-        ctx.strokeStyle = this.lineColor.rgba();
-        ctx.lineWidth = this.radius / 4;
-        ctx.lineCap = "butt";
         ctx.beginPath();
         ctx.arc( this.x, this.y, this.radius, 0, 2 * pi, false );
-        if( options.fill ) { ctx.fill() };
-        if( options.outline ) { ctx.stroke() };
+        if( options.fill ) { ctx.fillStyle = this.color.rgba(); ctx.fill() };
+        if( options.outline ) { 
+            ctx.strokeStyle = this.lineColor.rgba();
+            ctx.lineWidth = this.radius / 6;
+            ctx.lineCap = "butt";
+            ctx.stroke();
+        }
     }
 
     //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
-        let index = particles.indexOf(this);
+
         if( options.mouseEdges ) {
-            let a = this.x - mouse.cx;
-            let b = this.y - mouse.cy;
-            let distance = Math.hypot(a, b);
+            let xDiff = this.x - mouse.cx;
+            let yDiff = this.y - mouse.cy;
+            let distance = Math.hypot(xDiff, yDiff);
             if( mouse.inCanvas() && ( distance < 1.5 * options.vicinity ) ) {
                 const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
                 ctx.lineCap = "round";
                 ctx.strokeStyle = this.lineColor.rgba(alpha);
-                ctx.lineWidth = Math.sqrt(this.radius) * Math.log( options.vicinity - distance * 1.5 + 1 );
+                ctx.lineWidth = Math.sqrt(this.radius) * Math.log( 1.5 * options.vicinity - distance + 1 );
                 ctx.beginPath();
                 ctx.moveTo(this.x, this.y);
                 ctx.lineTo(mouse.cx, mouse.cy);
@@ -250,11 +281,11 @@ class Particle {
         }
 
         if( options.edges ) {
-            for ( let i = index -1; i >= 0; i-- ) {
+            for ( let i = particles.indexOf(this) -1; i >= 0; i-- ) {
                 let p = particles[i];
-                let a = this.x - p.x;
-                let b = this.y - p.y;
-                let distance = Math.hypot(a, b);
+                let xDiff = this.x - p.x;
+                let yDiff = this.y - p.y;
+                let distance = Math.hypot(xDiff, yDiff);
                 
                 if( distance < options.vicinity ) {
                     const alpha = options.opacity - ( distance / (options.vicinity / options.opacity) );

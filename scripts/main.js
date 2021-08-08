@@ -2,14 +2,10 @@
 function nextFrame() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    //Loops need to be separate, so that both particles detect the collision
     particles.forEach( particle => {
-        particle.collide();
         particle.move();
-        particle.render(); 
-    })
-
-    particles.forEach( particle => {
+        particle.collide();
+        particle.render();
         particle.renderEdges();
     })
 }
@@ -23,12 +19,11 @@ function moveCursor(event) {
 }
 
 function generateParticle(event) {
-    const direction = Math.random() * 2 * pi;
-    const newParticle = new Particle(mouse.cx, mouse.cy, options.speed(), direction);
+    const newParticle = new Particle(mouse.cx, mouse.cy, options.speed(), options.direction());
     particles.push(newParticle);
     newParticle.render();
 }
 
 canvas.addEventListener('click', generateParticle);
 window.addEventListener('mousemove', moveCursor);
-setInterval(nextFrame, 16.6);
+setInterval(nextFrame, 16.66);
