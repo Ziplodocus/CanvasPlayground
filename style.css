@@ -40,7 +40,8 @@ main {
 
 canvas {
     margin: 5vh auto;
-    height: 40vh;
+    height: 84vh;
     width: 90%;
-    background-color: #DDD;
+    background-color: #111;
+    cursor: none;
 }
