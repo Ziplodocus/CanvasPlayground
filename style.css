@@ -3,7 +3,7 @@
 * {
     margin: 0 auto;
     padding: 0;
-    transform-box: border-box;
+    box-sizing: border-box;
 }
 
 html {
@@ -40,7 +40,7 @@ main {
 
 canvas {
     margin: 5vh auto;
-    height: 84vh;
+    height: 40vh;
     width: 90%;
-    background-color: #000;
+    background-color: #DDD;
 }

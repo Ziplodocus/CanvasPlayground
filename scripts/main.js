@@ -1,13 +1,15 @@
 
 function nextFrame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    particles.forEach( particle => {
-        particle.move();
-        particle.collide();
-        particle.render();
-        particle.renderEdges();
-    })
+    setTimeout(function() {
+        requestAnimationFrame(nextFrame);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach( particle => {
+            particle.move();
+            particle.collide();
+            particle.render();
+            particle.renderEdges();
+        }) 
+    }, 1000 / 60);
 }
 
 function moveCursor(event) {
@@ -26,4 +28,4 @@ function generateParticle(event) {
 
 canvas.addEventListener('click', generateParticle);
 window.addEventListener('mousemove', moveCursor);
-setInterval(nextFrame, 16.66);
+nextFrame();

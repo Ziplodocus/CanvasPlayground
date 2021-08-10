@@ -9,14 +9,12 @@ function resizeCanvas() {
         }
     }
 
-    let sizeRatio = newCanvasSize.area() / canvasSize.area();
-    options.vicinity *= sizeRatio;
-
+    let sizeRatio = newCanvasSize.width / canvasSize.width;
+    options.vicinity *= sizeRatio**0.5;
 
     particles.forEach(particle => {
-        particle._x = particle.x * (newCanvasSize.width / canvasSize.width);
-        particle._y = particle.y * (newCanvasSize.height / canvasSize.height);
-        particle._radius * sizeRatio;
+        particle.setX = particle.x * (newCanvasSize.width / canvasSize.width);
+        particle.setY = particle.y * (newCanvasSize.height / canvasSize.height);
     })
     canvas.height = Math.floor(resolutionModifier * newCanvasSize.height);
     canvas.width = Math.floor(resolutionModifier * newCanvasSize.width);
@@ -31,8 +29,4 @@ function resize() {
 resizeCanvas();
 window.addEventListener('resize', resize);
 
-for (let i = options.initialParticles; i > 0; i--) {
-    let randX = Math.random() * (canvasSize.width - 2*options.maxSize) * resolutionModifier + options.maxSize;
-    let randY = Math.random() * (canvasSize.height - 2*options.maxSize) * resolutionModifier + options.maxSize;
-    particles.push(new Particle(randX, randY, options.speed(), options.direction()));
-}
+Particle.initialize();

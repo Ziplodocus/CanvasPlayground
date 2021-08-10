@@ -15,13 +15,13 @@ const options = {
     mouseEdges: true,
     edges: true,
     fill: true,
-    outline: true,
-    minSpeed: 0.5,
-    maxSpeed: 5,
-    minSize: 20,
-    maxSize: 50,
+    outline: false,
+    minSpeed: 0.1,
+    maxSpeed: 2,
+    minSize: 5,
+    maxSize: 10,
     vicinity: 200,
-    initialParticles: 15,
+    initialParticles: 10,
 
     speed() {
         return Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed;
@@ -131,11 +131,11 @@ class Particle {
     constructor( xPosition, yPosition, speed, directionRadeons ) {
         this._x = xPosition;
         this._y = yPosition;
-        this._vx = speed * Math.cos(directionRadeons);
-        this._vy = speed * Math.sin(directionRadeons);
+        this._vx = speed * Math.cos( directionRadeons );
+        this._vy = speed * Math.sin( directionRadeons );
         this._color = new Color();
         this._lineColor = new Color();
-        this._radius = options.minSize + (options.maxSize - options.minSize) * ((speed - options.minSpeed) / (options.maxSpeed - options.minSpeed));
+        this._radius = options.minSize + ( options.maxSize - options.minSize ) * ( (speed - options.minSpeed) / (options.maxSpeed - options.minSpeed + 0.000001) );
     }
 
     get x() { return this._x }
@@ -149,7 +149,6 @@ class Particle {
     get speed() { return vtr.norm([this.vx, this.vy]) }
     get direction() { return Math.acos( this.vx / this.speed ) }
     get mass() { return 4/3 * pi * this.radius**3 }
-
 
     set setX( xPos ) { this._x = xPos }
     set setY( yPos ) { this._y = yPos }
@@ -235,8 +234,9 @@ class Particle {
         //Handles bouncing off of the container
         let exceedHorizontal = (this.x + this.radius > canvas.width) || (this.x - this.radius < 0);
         let exceedVertical = (this.y + this.radius > canvas.height) || (this.y - this.radius < 0);
+        
+        // Determines +ve or -ve adjustment based on which wall is touched
         if(exceedHorizontal) { 
-            // Determines +ve or -ve adjustment based on which wall is touched
             let adj = this.x - this.radius < 0 ? this.x - this.radius : this.x + this.radius - canvas.width;
             this.setX = this.x - adj;
             this.setVx = -this.vx; 
@@ -264,40 +264,58 @@ class Particle {
     //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
 
-        if( options.mouseEdges ) {
-            let xDiff = this.x - mouse.cx;
-            let yDiff = this.y - mouse.cy;
-            let distance = Math.hypot(xDiff, yDiff);
-            if( mouse.inCanvas() && ( distance < 1.5 * options.vicinity ) ) {
-                const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
-                ctx.lineCap = "round";
-                ctx.strokeStyle = this.lineColor.rgba(alpha);
-                ctx.lineWidth = Math.sqrt(this.radius) * Math.log( 1.5 * options.vicinity - distance + 1 );
-                ctx.beginPath();
-                ctx.moveTo(this.x, this.y);
-                ctx.lineTo(mouse.cx, mouse.cy);
-                ctx.stroke();
-            }
-        }
-
         if( options.edges ) {
             for ( let i = particles.indexOf(this) -1; i >= 0; i-- ) {
                 let p = particles[i];
                 let xDiff = this.x - p.x;
+                if ( xDiff > options.vicinity ) { continue };
+
                 let yDiff = this.y - p.y;
+                if( yDiff > options.vicinity ) { continue };
+
                 let distance = Math.hypot(xDiff, yDiff);
-                
                 if( distance < options.vicinity ) {
                     const alpha = options.opacity - ( distance / (options.vicinity / options.opacity) );
                     ctx.strokeStyle = ( Color.avgColors( [this.lineColor, p.lineColor] ) ).rgba(alpha);
                     ctx.lineCap = "round";
-                    ctx.lineWidth = Math.sqrt(this.radius + p.radius) / 2 * Math.log( options.vicinity - distance + 1 );
+                    let radii = this.radius + p.radius;
+                    ctx.lineWidth = radii / 5;
                     ctx.beginPath();
                     ctx.moveTo(this.x, this.y);
                     ctx.lineTo(p.x, p.y);
                     ctx.stroke()               
                 }
             }
+        }
+
+        if( options.mouseEdges ) {
+            if ( !mouse.inCanvas() ) { return };
+
+            let xDiff = this.x - mouse.cx;
+            if ( xDiff > options.vicinity*1.5 ) { return };
+
+            let yDiff = this.y - mouse.cy;
+            if ( yDiff > options.vicinity*1.5 ) { return };
+            
+            let distance = Math.hypot(xDiff, yDiff);
+            if( distance < 1.5 * options.vicinity ) {
+                const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
+                ctx.lineCap = "round";
+                ctx.strokeStyle = this.lineColor.rgba(alpha);
+                ctx.lineWidth = this.radius / 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(mouse.cx, mouse.cy);
+                ctx.stroke();
+            }
+        }
+    }
+
+    static initialize() {
+        for (let i = options.initialParticles; i > 0; i--) {
+            let randX = Math.random() * (canvasSize.width - 2*options.maxSize) * resolutionModifier + options.maxSize;
+            let randY = Math.random() * (canvasSize.height - 2*options.maxSize) * resolutionModifier + options.maxSize;
+            particles.push(new Particle(randX, randY, options.speed(), options.direction()));
         }
     }
 }
