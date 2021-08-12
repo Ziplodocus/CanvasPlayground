@@ -1,23 +1,13 @@
 
 function nextFrame() {
-    setTimeout(function() {
-        requestAnimationFrame(nextFrame);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach( particle => {
-            particle.move();
-            particle.collide();
-            particle.render();
-            particle.renderEdges();
-        }) 
-    }, 1000 / 60);
-}
-
-function moveCursor(event) {
-    boundary = canvas.getBoundingClientRect();
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-    mouse.cx = (event.clientX - boundary.left) * resolutionModifier;
-    mouse.cy = (event.clientY - boundary.top) * resolutionModifier;
+    requestAnimationFrame(nextFrame);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach( particle => {
+        particle.move();
+        particle.collide();
+        particle.render();
+        particle.renderEdges();
+    }) 
 }
 
 function generateParticle(event) {
@@ -26,6 +16,8 @@ function generateParticle(event) {
     newParticle.render();
 }
 
-canvas.addEventListener('click', generateParticle);
-window.addEventListener('mousemove', moveCursor);
+canvas.addEventListener( 'click', generateParticle );
+window.addEventListener( 'touchmove', mouse.move );
+window.addEventListener( 'touchend', mouse.reset );
+window.addEventListener( 'mousemove', mouse.move );
 nextFrame();
