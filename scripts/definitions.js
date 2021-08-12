@@ -1,27 +1,28 @@
 
+const pi = Math.PI;
+
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
 let boundary = canvas.getBoundingClientRect();
-const pi = Math.PI;
+
+const particles = [];
 
 //Multiplier to make the canvas higher resolution, helps with sharpness
 const resolutionModifier = 2;
 
-//Defining some default particles at the four corners
-const particles = [];
 //Restraints on particle properties
 const options = {
-    opacity: 0.6,
+    opacity: 0.1,
     mouseEdges: true,
     edges: true,
     fill: true,
-    outline: false,
+    outline: true,
     minSpeed: 0.1,
-    maxSpeed: 2,
-    minSize: 5,
-    maxSize: 10,
-    vicinity: 200,
-    initialParticles: 10,
+    maxSpeed: 1,
+    minRadius: 3,
+    maxRadius: 8,
+    vicinity: 100,
+    initialParticles: 40,
 
     speed() {
         return Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed;
@@ -49,6 +50,17 @@ const mouse = {
         let inX = (this.x > boundary.left) && ((this.cx / resolutionModifier) + boundary.left < boundary.right) ? true : false;
         let inY = (this.y > boundary.top) && ((this.cy / resolutionModifier) + boundary.top < boundary.bottom) ? true : false;
         return inY && inX ? true : false;
+    },
+    move(event) {
+        boundary = canvas.getBoundingClientRect();
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
+        mouse.cx = (event.clientX - boundary.left) * resolutionModifier;
+        mouse.cy = (event.clientY - boundary.top) * resolutionModifier;
+    },
+    reset(event) {
+        mouse.x = 0;
+        mouse.y = 0;
     }
 };
 
@@ -135,7 +147,7 @@ class Particle {
         this._vy = speed * Math.sin( directionRadeons );
         this._color = new Color();
         this._lineColor = new Color();
-        this._radius = options.minSize + ( options.maxSize - options.minSize ) * ( (speed - options.minSpeed) / (options.maxSpeed - options.minSpeed + 0.000001) );
+        this._radius = options.minRadius + ( options.maxRadius - options.minRadius ) * ( (speed - options.minSpeed) / (options.maxSpeed - options.minSpeed + 0.000001) );
     }
 
     get x() { return this._x }
@@ -263,7 +275,7 @@ class Particle {
 
     //Draws edges between particles within a vicinity, and also to the tracked mouse position
     renderEdges() {
-
+        ctx.lineCap = "round";
         if( options.edges ) {
             for ( let i = particles.indexOf(this) -1; i >= 0; i-- ) {
                 let p = particles[i];
@@ -277,7 +289,6 @@ class Particle {
                 if( distance < options.vicinity ) {
                     const alpha = options.opacity - ( distance / (options.vicinity / options.opacity) );
                     ctx.strokeStyle = ( Color.avgColors( [this.lineColor, p.lineColor] ) ).rgba(alpha);
-                    ctx.lineCap = "round";
                     let radii = this.radius + p.radius;
                     ctx.lineWidth = radii / 5;
                     ctx.beginPath();
@@ -296,11 +307,10 @@ class Particle {
 
             let yDiff = this.y - mouse.cy;
             if ( yDiff > options.vicinity*1.5 ) { return };
-            
+
             let distance = Math.hypot(xDiff, yDiff);
             if( distance < 1.5 * options.vicinity ) {
                 const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
-                ctx.lineCap = "round";
                 ctx.strokeStyle = this.lineColor.rgba(alpha);
                 ctx.lineWidth = this.radius / 2;
                 ctx.beginPath();
@@ -313,8 +323,8 @@ class Particle {
 
     static initialize() {
         for (let i = options.initialParticles; i > 0; i--) {
-            let randX = Math.random() * (canvasSize.width - 2*options.maxSize) * resolutionModifier + options.maxSize;
-            let randY = Math.random() * (canvasSize.height - 2*options.maxSize) * resolutionModifier + options.maxSize;
+            let randX = Math.random() * (canvasSize.width - 2*options.maxRadius) * resolutionModifier + options.maxRadius;
+            let randY = Math.random() * (canvasSize.height - 2*options.maxRadius) * resolutionModifier + options.maxRadius;
             particles.push(new Particle(randX, randY, options.speed(), options.direction()));
         }
     }

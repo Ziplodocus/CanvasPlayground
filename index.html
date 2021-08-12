@@ -21,6 +21,28 @@
 
     <main>
         <canvas id="particles" height="1000" width="1000"></canvas>
+        <form>
+            <span>
+                <input id="opacity" name="opacity" type="range" min="0" max="1" step="0.05">
+                <label name="opacity" for="opacity">Opacity</label>
+            </span>
+            <span>
+                <input id="fill" type="checkbox" name="fill" value="true" >
+                <label name="fill" for="fill">Fill?</label>
+            </span>
+            <span>
+                <input id="outline" type="checkbox" name="outline" value="true" >
+                <label name="fill" for="outline">Outline?</label>
+            </span>
+            <span>
+                <input id="edges" type="checkbox" name="edges" value="true" >
+                <label name="fill" for="edges">Edges?</label>
+            </span>
+            <span>
+                <input id="mouseEdges" type="checkbox" name="mouseEdges" value="true" >
+                <label name="fill" for="mouseEdges">Mouse Edges?</label>
+            </span>
+        </form>
     </main>
 
     <script src="./scripts/definitions.js"></script>
