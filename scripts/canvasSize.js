@@ -16,8 +16,8 @@ function resizeCanvas() {
         particle.setX = particle.x * (newCanvasSize.width / canvasSize.width);
         particle.setY = particle.y * (newCanvasSize.height / canvasSize.height);
     })
-    canvas.height = Math.floor(resolutionModifier * newCanvasSize.height);
-    canvas.width = Math.floor(resolutionModifier * newCanvasSize.width);
+    canvas.height = Math.floor(options.resolutionModifier * newCanvasSize.height);
+    canvas.width = Math.floor(options.resolutionModifier * newCanvasSize.width);
     canvasSize = newCanvasSize;
 }
 
