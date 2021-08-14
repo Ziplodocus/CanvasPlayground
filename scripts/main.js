@@ -16,8 +16,22 @@ function generateParticle(event) {
     newParticle.render();
 }
 
+function changeOptions(event) {
+    const inputElement = event.currentTarget;
+    const valName = inputElement.name;
+    const value = inputElement.type == 'checkbox' ? !inputElement.checked : parseFloat(inputElement.value);
+    options[valName] = value;
+}
+
+const opacitySlide = document.querySelector('input[type="range"]');
+opacitySlide.addEventListener('input', changeOptions);
+const checkBoxes = document.querySelectorAll('input[type="checkbox"]');
+for (let check of checkBoxes) {
+    check.addEventListener('input', changeOptions);
+}
+
 canvas.addEventListener( 'click', generateParticle );
-window.addEventListener( 'touchmove', mouse.move );
-window.addEventListener( 'touchend', mouse.reset );
+window.addEventListener( 'ontouchmove', mouse.move );
+window.addEventListener( 'ontouchend', mouse.reset );
 window.addEventListener( 'mousemove', mouse.move );
 nextFrame();

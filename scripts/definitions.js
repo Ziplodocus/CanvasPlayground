@@ -7,22 +7,22 @@ let boundary = canvas.getBoundingClientRect();
 
 const particles = [];
 
-//Multiplier to make the canvas higher resolution, helps with sharpness
-const resolutionModifier = 2;
-
 //Restraints on particle properties
 const options = {
-    opacity: 0.1,
+    opacity: 1,
     mouseEdges: true,
     edges: true,
     fill: true,
     outline: true,
+
     minSpeed: 0.1,
-    maxSpeed: 1,
+    maxSpeed: 3,
     minRadius: 3,
-    maxRadius: 8,
-    vicinity: 100,
-    initialParticles: 40,
+    maxRadius: 15,
+    vicinity: 140,
+
+    resolutionModifier: 2,
+    initialParticles: 20,
 
     speed() {
         return Math.random() * (this.maxSpeed - this.minSpeed) + this.minSpeed;
@@ -47,16 +47,16 @@ const mouse = {
     cx: 0,
     cy: 0,
     inCanvas() {
-        let inX = (this.x > boundary.left) && ((this.cx / resolutionModifier) + boundary.left < boundary.right) ? true : false;
-        let inY = (this.y > boundary.top) && ((this.cy / resolutionModifier) + boundary.top < boundary.bottom) ? true : false;
+        let inX = (this.x > boundary.left) && ((this.cx / options.resolutionModifier) + boundary.left < boundary.right) ? true : false;
+        let inY = (this.y > boundary.top) && ((this.cy / options.resolutionModifier) + boundary.top < boundary.bottom) ? true : false;
         return inY && inX ? true : false;
     },
     move(event) {
         boundary = canvas.getBoundingClientRect();
         mouse.x = event.clientX;
         mouse.y = event.clientY;
-        mouse.cx = (event.clientX - boundary.left) * resolutionModifier;
-        mouse.cy = (event.clientY - boundary.top) * resolutionModifier;
+        mouse.cx = (event.clientX - boundary.left) * options.resolutionModifier;
+        mouse.cy = (event.clientY - boundary.top) * options.resolutionModifier;
     },
     reset(event) {
         mouse.x = 0;
@@ -100,13 +100,13 @@ class Color {
         this._r = Math.random() * 255;
         this._g = Math.random() * 255;
         this._b = Math.random() * 255;
-        this._a = opacity;
+        this._a = options;
     }
     //Are these getters and setters pointless? should setters be named differently?
     get r() {return this._r}
     get g() {return this._g}
     get b() {return this._b}
-    get a() {return this._a}
+    get a() {return this._a.opacity}
 
     set r(re) {this._r = re;}
     set g(gr) {this._g = gr;}
@@ -267,7 +267,7 @@ class Particle {
         if( options.fill ) { ctx.fillStyle = this.color.rgba(); ctx.fill() };
         if( options.outline ) { 
             ctx.strokeStyle = this.lineColor.rgba();
-            ctx.lineWidth = this.radius / 6;
+            ctx.lineWidth = this.radius / 3;
             ctx.lineCap = "butt";
             ctx.stroke();
         }
@@ -323,9 +323,13 @@ class Particle {
 
     static initialize() {
         for (let i = options.initialParticles; i > 0; i--) {
-            let randX = Math.random() * (canvasSize.width - 2*options.maxRadius) * resolutionModifier + options.maxRadius;
-            let randY = Math.random() * (canvasSize.height - 2*options.maxRadius) * resolutionModifier + options.maxRadius;
+            let randX = Math.random() * (canvasSize.width - 2*options.maxRadius) * options.resolutionModifier + options.maxRadius;
+            let randY = Math.random() * (canvasSize.height - 2*options.maxRadius) * options.resolutionModifier + options.maxRadius;
             particles.push(new Particle(randX, randY, options.speed(), options.direction()));
         }
+    }
+
+    static applySettings() {
+        return
     }
 }
