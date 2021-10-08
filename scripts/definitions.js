@@ -1,7 +1,7 @@
+import { z, Z } from './z-query.js';
 
 const pi = Math.PI;
-
-const canvas = document.getElementById('particles');
+const canvas = z('#particles');
 const ctx = canvas.getContext('2d');
 let boundary = canvas.getBoundingClientRect();
 
@@ -333,3 +333,5 @@ class Particle {
         return
     }
 }
+
+export { particles, options, canvas, mouse, vtr, ctx, Color, Particle };

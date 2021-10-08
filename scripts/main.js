@@ -1,3 +1,5 @@
+import { z, Z } from './z-query.js';
+import { particles,  Particle, options, canvas, mouse, ctx,  } from './definitions.js';
 
 function nextFrame() {
     requestAnimationFrame(nextFrame);
@@ -23,15 +25,10 @@ function changeOptions(event) {
     options[valName] = value;
 }
 
-const opacitySlide = document.querySelector('input[type="range"]');
-opacitySlide.addEventListener('input', changeOptions);
-const checkBoxes = document.querySelectorAll('input[type="checkbox"]');
-for (let check of checkBoxes) {
-    check.addEventListener('input', changeOptions);
-}
-
-canvas.addEventListener( 'click', generateParticle );
-window.addEventListener( 'touchmove', mouse.move );
-window.addEventListener( 'touchend', mouse.reset );
-window.addEventListener( 'mousemove', mouse.move );
+z('input[type="range"]').on('input', changeOptions);
+Z('input[type="checkbox"]').on('input', changeOptions)
+canvas.on( 'click', generateParticle );
+window.on( 'touchmove', mouse.move );
+window.on( 'touchend', mouse.reset );
+window.on( 'mousemove', mouse.move );
 nextFrame();

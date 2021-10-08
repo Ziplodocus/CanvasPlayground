@@ -1,4 +1,15 @@
+
+import { z, Z } from './z-query.js';
+import { particles,  canvas, options, Particle } from './definitions.js';
+
 let resizeId;
+let canvasSize = {
+    width: getComputedStyle(canvas).width.replace('px',''),
+    height: getComputedStyle(canvas).height.replace('px',''),
+    area() {
+        return this.width * this.height
+    }
+}
 
 function resizeCanvas() {
     let newCanvasSize = {
@@ -27,6 +38,5 @@ function resize() {
 }
 
 resizeCanvas();
-window.addEventListener('resize', resize);
-
+window.on('resize', resize);
 Particle.initialize();

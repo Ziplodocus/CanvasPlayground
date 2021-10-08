@@ -5,11 +5,14 @@
     --lightest: #FFF;
     --lighter: #DDD;
     --light: #BBB;
+    --medium-light: #999;
+    --medium: #888;
+    --medium-dark: #777;
     --darkest: #000;
     --darker: #111;
     --dark: #333;
     --dark-gradient: #222;
-    --background: linear-gradient(-20deg, var(--dark), var(--dark-gradient));
+    --background: linear-gradient(-20deg, var(--dark), var(--medium-dark));
     --box-shadow: 
         1px 1px 5px rgba(0, 0, 0, 0.6) inset,
         -1px -1px 5px rgba(255, 255, 255, 0.1) inset,
