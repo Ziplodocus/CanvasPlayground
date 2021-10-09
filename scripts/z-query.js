@@ -9,7 +9,7 @@ NodeList.prototype.on = function( eventType, callback ) {
     this.forEach( node => node.on(eventType, callback) );
 }
 
-EventTarget.prototype.off = EventTarget.removeEventListener;
+EventTarget.prototype.off = EventTarget.prototype.removeEventListener;
 NodeList.prototype.off = function( eventType, callback ) {
     this.forEach( node => node.off(eventType, callback) );
 }
