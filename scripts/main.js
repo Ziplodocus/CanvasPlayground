@@ -1,8 +1,9 @@
-import { z, Z } from './z-query.js';
+import { z, Z, zQuery } from '../modules/zQuery/z-query.js';
 import { particles,  Particle, options, canvas, mouse, ctx,  } from './definitions.js';
+import { handleResize, resizeCanvas } from './canvasSize.js';
+zQuery.init(['events']);
 
 function nextFrame() {
-    requestAnimationFrame(nextFrame);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach( particle => {
         particle.move();
@@ -10,6 +11,7 @@ function nextFrame() {
         particle.render();
         particle.renderEdges();
     }) 
+    requestAnimationFrame(nextFrame);
 }
 
 function generateParticle(event) {
@@ -28,7 +30,12 @@ function changeOptions(event) {
 z('input[type="range"]').on('input', changeOptions);
 Z('input[type="checkbox"]').on('input', changeOptions)
 canvas.on( 'click', generateParticle );
-window.on( 'touchmove', mouse.move );
-window.on( 'touchend', mouse.reset );
-window.on( 'mousemove', mouse.move );
+document.on( 'touchmove', mouse.move );
+document.on( 'touchend', mouse.reset );
+document.on( 'mousemove', mouse.move, {'passive': true} );
 nextFrame();
+
+resizeCanvas();
+window.on('resize', handleResize, {'passive': true});
+window.on('scroll', handleResize, {'passive': true});
+Particle.initialize();

@@ -1,42 +1,24 @@
-
-import { z, Z } from './z-query.js';
-import { particles,  canvas, options, Particle } from './definitions.js';
-
-let resizeId;
-let canvasSize = {
-    width: getComputedStyle(canvas).width.replace('px',''),
-    height: getComputedStyle(canvas).height.replace('px',''),
-    area() {
-        return this.width * this.height
-    }
-}
+import { particles, canvas, options, canvasSize } from './definitions.js';
 
 function resizeCanvas() {
-    let newCanvasSize = {
-        width: getComputedStyle(canvas).width.replace('px',''),
-        height: getComputedStyle(canvas).height.replace('px',''),
-        area() {
-            return this.width * this.height
-        }
-    }
+    const oldCanvasSize = { ...canvasSize };
+    canvasSize.refresh();
 
-    let sizeRatio = newCanvasSize.width / canvasSize.width;
+    const sizeRatio = canvasSize.width / oldCanvasSize.width;
     options.vicinity *= sizeRatio**0.5;
 
-    particles.forEach(particle => {
-        particle.setX = particle.x * (newCanvasSize.width / canvasSize.width);
-        particle.setY = particle.y * (newCanvasSize.height / canvasSize.height);
+    particles.forEach( particle => {
+        particle.x = particle.x * (canvasSize.width / oldCanvasSize.width);
+        particle.y = particle.y * (canvasSize.height / oldCanvasSize.height);
     })
-    canvas.height = Math.floor(options.resolutionModifier * newCanvasSize.height);
-    canvas.width = Math.floor(options.resolutionModifier * newCanvasSize.width);
-    canvasSize = newCanvasSize;
+    canvas.height = Math.floor(options.resolutionModifier * canvasSize.height);
+    canvas.width = Math.floor(options.resolutionModifier * canvasSize.width);
 }
 
-function resize() {
+let resizeId;
+function handleResize() {
     clearTimeout(resizeId);
     resizeId = setTimeout(resizeCanvas, 300);
 }
 
-resizeCanvas();
-window.on('resize', resize);
-Particle.initialize();
+export { handleResize, resizeCanvas };

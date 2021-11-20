@@ -51,15 +51,15 @@ html {
 
 body {
     height: 100vh;
-    padding: 2.5vh 2%;
+    padding: 2vh 2%;
     background: var(--dark);
     overflow: hidden;
-    background: var(--background);
+    background: lightgray;
 }
 
 main {
     margin: auto;
-    border-radius: 3rem;
+    border-radius: 2.5rem;
     padding: min(5vw, 2rem) min(5%, 2rem) min(3vh, 2rem);
     height: 95vh;
     width: 95%;
