@@ -6,6 +6,7 @@ import { ParticleCanvas } from '../classes/ParticleCanvas.js';
 zQuery.init( [ 'events' ] );
 
 const canvas = z( 'particle-canvas' );
+console.log(canvas);
 const ctx = canvas.getContext( '2d' );
 
 function nextFrame() {
