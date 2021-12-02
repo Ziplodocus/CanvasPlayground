@@ -10,15 +10,15 @@ const options = {
 	edges: true,
 	fill: true,
 	outline: true,
+	resolutionModifier: 2,
 
 	minSpeed: 0.1,
 	maxSpeed: 2,
 	minRadius: 5,
 	maxRadius: 10,
 	vicinity: 150,
-
-	resolutionModifier: 2,
 	initialParticles: 50,
+
 
 	speed() {
 		return Math.random() * ( this.maxSpeed - this.minSpeed ) + this.minSpeed;
@@ -28,27 +28,6 @@ const options = {
 }
 
 //Object to track position of the mouse and determine whether it is in the canvas.
-const mouse = {
-	x: 0,
-	y: 0,
-	cx: 0,
-	cy: 0,
-	inCanvas() {
-		const inX = ( this.x > canvasSize.bounds.left ) && ( ( this.cx / options.resolutionModifier ) + canvasSize.bounds.left < canvasSize.bounds.right ) ? true : false;
-		const inY = ( this.y > canvasSize.bounds.top ) && ( ( this.cy / options.resolutionModifier ) + canvasSize.bounds.top < canvasSize.bounds.bottom ) ? true : false;
-		return inY && inX ? true : false;
-	},
-	move( event ) {
-		mouse.x = event.clientX;
-		mouse.y = event.clientY;
-		mouse.cx = ( event.clientX - canvasSize.bounds.left ) * options.resolutionModifier;
-		mouse.cy = ( event.clientY - canvasSize.bounds.top ) * options.resolutionModifier;
-	},
-	reset( event ) {
-		mouse.x = 0;
-		mouse.y = 0;
-	}
-};
 
 
 // const vtr = {
@@ -82,4 +61,4 @@ const mouse = {
 // }
 
 
-export { particles, options, mouse };
+export { particles, options };

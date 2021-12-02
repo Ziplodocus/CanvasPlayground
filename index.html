@@ -18,7 +18,22 @@
 
 <body>
 	<main>
-		<canvas is='particle-canvas'></canvas>
+		<canvas is='particle-canvas' data-options='{
+				"opacity": 1,
+				"mouseEdges": true,
+				"fill": true,
+				"outline": true,
+				"edges": true,
+				"resolutionModifier": 2,
+				"vicinity": 150
+			}' data-particle-options='{
+				"minSpeed": 0.1,
+				"maxSpeed": 2,
+				"minRadius": 5,
+				"maxRadius": 10,
+				"initialParticles": 50
+			}'>
+		</canvas>
 		<form>
 			<label class="button">
 				<input name="opacity" type="range" min="0" max="1" step="0.05" value="1">

@@ -1,25 +1,27 @@
-import { options } from '../scripts/definitions.js';
+import { options } from '../scripts/definitions';
+import { Color } from './Color';
+import { pi } from '../scripts/helpers';
+import { Vector2d } from './Vector2d';
 
 export class Particle {
-	constructor( xPosition, yPosition, speed, directionRadeons ) {
-		this._x = xPosition;
-		this._y = yPosition;
-		this._vx = speed * Math.cos( directionRadeons );
-		this._vy = speed * Math.sin( directionRadeons );
-		this._color = new Color();
-		this._lineColor = new Color();
-		this._radius = options.minRadius + ( options.maxRadius - options.minRadius ) * ( ( speed - options.minSpeed ) / ( options.maxSpeed - options.minSpeed + 0.000001 ) );
+	constructor( xPos, yPos, speed, directionRadeons ) {
+		this.position = new Vector2d( xPos, yPos );
+		console.log( speed, directionRadeons )
+		this.velocity = new Vector2d(
+			speed * Math.cos( directionRadeons ),
+			speed * Math.sin( directionRadeons )
+		)
+		this.color = new Color();
+		this.lineColor = new Color();
+		this.radius = options.minRadius + ( options.maxRadius - options.minRadius ) * ( ( speed - options.minSpeed ) / ( options.maxSpeed - options.minSpeed + 0.000001 ) );
 	}
 
-	get x() { return this._x }
-	get y() { return this._y }
-	get vx() { return this._vx }
-	get vy() { return this._vy }
-	get color() { return this._color }
-	get lineColor() { return this._lineColor }
-	get radius() { return this._radius }
+	get x() { return this.position.x }
+	get y() { return this.position.y }
+	get vx() { return this.velocity.x }
+	get vy() { return this.velocity.y }
 
-	get speed() { return vtr.norm( [ this.vx, this.vy ] ) }
+	get speed() { return this.velocity.norm }
 	get direction() { return Math.acos( this.vx / this.speed ) }
 	get mass() { return 4 / 3 * pi * this.radius ** 3 }
 
@@ -128,21 +130,6 @@ export class Particle {
 		}
 	}
 
-	//Draws the particle onto the canvas
-	render() {
-		if ( options.fill || options.outline ) {
-			ctx.beginPath();
-			ctx.arc( this.x, this.y, this.radius, 0, 2 * pi );
-		}
-		if ( options.fill ) { ctx.fillStyle = this.color.rgba(); ctx.fill() };
-		if ( options.outline ) {
-			ctx.strokeStyle = this.lineColor.rgba();
-			ctx.lineWidth = this.radius / 3;
-			ctx.lineCap = "butt";
-			ctx.stroke();
-		}
-	}
-
 	//Draws edges between particles within a vicinity, and also to the tracked mouse position
 	renderEdges() {
 		ctx.lineCap = "round";
@@ -188,14 +175,6 @@ export class Particle {
 				ctx.lineTo( mouse.cx, mouse.cy );
 				ctx.stroke();
 			}
-		}
-	}
-
-	static initialize() {
-		for ( let i = options.initialParticles; i > 0; i-- ) {
-			const randX = Math.random() * ( canvasSize.width - 2 * options.maxRadius ) * options.resolutionModifier + options.maxRadius;
-			const randY = Math.random() * ( canvasSize.height - 2 * options.maxRadius ) * options.resolutionModifier + options.maxRadius;
-			particles.push( new Particle( randX, randY, options.speed(), options.direction() ) );
 		}
 	}
 }

@@ -1,23 +1,22 @@
 
 export class Color {
-  constructor( r = Color.randHex(), g = Color.randHex(), b = Color.randHex() ) {
+  constructor( r = Color.randHex(), g = Color.randHex(), b = Color.randHex(), a = 1 ) {
     this._r = r;
     this._g = g;
     this._b = b;
+    this._a = a;
   }
   //Are these getters and setters pointless? should setters be named differently?
   get r() { return this._r }
   get g() { return this._g }
   get b() { return this._b }
-  get a() { return options.opacity }
+  get a() { return this._a }
+  get rgba() { return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})` }
 
   set r( re ) { this._r = re }
   set g( gr ) { this._g = gr }
   set b( bl ) { this._b = bl }
-  set a( al ) { this._a.opacity = al }
-
-  //returns the rgba version of the color, with a parameter option to manually set the opacity
-  rgba( opacity = this.a ) { return `rgba(${this.r}, ${this.g}, ${this.b}, ${opacity})` }
+  set a( al ) { this._a = al }
 
   //returns a new color from the average values of an array of other colors,
   static avgColors( colorArr ) {
