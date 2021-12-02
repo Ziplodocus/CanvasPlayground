@@ -13,13 +13,12 @@
 
 	<link rel="icon" type="image/png" href="./assets/icon.png">
 	<link rel="stylesheet" type="text/css" href="./src/styles/style.min.css">
-
-	<script defer src="./src/scripts/main.js" type="module"></script>
+	<script src="./src/scripts/main.js" type="module"></script>
 </head>
 
 <body>
 	<main>
-		<particle-canvas></particle-canvas>
+		<canvas is='particle-canvas'></canvas>
 		<form>
 			<label class="button">
 				<input name="opacity" type="range" min="0" max="1" step="0.05" value="1">

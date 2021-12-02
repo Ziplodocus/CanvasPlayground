@@ -1,11 +1,10 @@
 import { z, Z, zQuery } from '../../modules/zQuery/z-query.js';
 import { particles, options, mouse } from './definitions.js';
-import { handleResize, resizeCanvas } from './canvasSize.js';
 import { Particle } from '../classes/Particle.js';
 import { ParticleCanvas } from '../classes/ParticleCanvas.js';
 zQuery.init( [ 'events' ] );
 
-const canvas = z( 'particle-canvas' );
+const canvas = z( '[is=particle-canvas]' );
 const ctx = canvas.getContext( '2d' );
 
 function nextFrame() {
@@ -40,7 +39,4 @@ document.on( 'touchend', mouse.reset );
 document.on( 'mousemove', mouse.move, { 'passive': true } );
 nextFrame();
 
-resizeCanvas();
-window.on( 'resize', handleResize, { 'passive': true } );
-window.on( 'scroll', handleResize, { 'passive': true } );
 Particle.initialize();
