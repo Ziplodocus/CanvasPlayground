@@ -1,0 +1,30 @@
+{
+  "name": "particles",
+  "version": "1.0.0",
+  "description": "Modeled particles enclosed in a canvas",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "vite preview",
+    "test": "console.log(undefined)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ziplodocus/Particles.git"
+  },
+  "keywords": [
+    "Particles",
+    "physics",
+    "mechanics"
+  ],
+  "author": "Ziplodocus",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ziplodocus/Particles/issues"
+  },
+  "homepage": "https://github.com/Ziplodocus/Particles#readme",
+  "devDependencies": {
+    "vite": "^2.6.14"
+  }
+}
