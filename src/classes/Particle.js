@@ -1,41 +1,42 @@
 import { options } from '../scripts/definitions';
 import { Color } from './Color';
 import { pi } from '../scripts/helpers';
-import { Vector2d } from './Vector2d';
+import { Vector2d as Vtr } from './Vector2d';
+import { zQuery } from '../../modules/zQuery/z-query';
+import { EventEmitter } from './EventEmitter';
+zQuery.init( [ 'events' ] );
 
 export class Particle {
 	constructor( xPos, yPos, speed, directionRadeons ) {
-		this.position = new Vector2d( xPos, yPos );
-		console.log( speed, directionRadeons )
-		this.velocity = new Vector2d(
+		this.position = new Vtr( xPos, yPos );
+		this.velocity = new Vtr(
 			speed * Math.cos( directionRadeons ),
 			speed * Math.sin( directionRadeons )
 		)
 		this.color = new Color();
 		this.lineColor = new Color();
 		this.radius = options.minRadius + ( options.maxRadius - options.minRadius ) * ( ( speed - options.minSpeed ) / ( options.maxSpeed - options.minSpeed + 0.000001 ) );
+
+		this.events = new EventEmitter();
+		this.handleBoundsCollide = e => {
+			if ( e.details.horizontal ) this.velocity.x *= -1;
+			if ( e.details.vertical ) this.velocity.y *= -1;
+		}
+		this.events.on( 'boundsCollide', this.handleBoundsCollide );
+
+		this.move = () => {
+			this.position.add( this.velocity )
+		};
+		this.events.on( 'move', this.move )
 	}
 
 	get x() { return this.position.x }
 	get y() { return this.position.y }
 	get vx() { return this.velocity.x }
 	get vy() { return this.velocity.y }
-
 	get speed() { return this.velocity.norm }
 	get direction() { return Math.acos( this.vx / this.speed ) }
 	get mass() { return 4 / 3 * pi * this.radius ** 3 }
-
-	set x( xPos ) { this._x = xPos }
-	set y( yPos ) { this._y = yPos }
-	set vx( x_velocity ) { this._vx = x_velocity }
-	set vy( y_velocity ) { this._vy = y_velocity }
-
-
-	//Changes the x and y coordinates based on speed and the direction of the particle
-	move() {
-		this.x = this.x + this.vx;
-		this.y = this.y + this.vy;
-	}
 
 	//Handles collisions between different particles and the container
 	collide() {
@@ -113,20 +114,6 @@ export class Particle {
 				//Setting the new velocities on the particles
 				[ this.vx, this.vy, p.vx, p.vy ] = [ v1x, v1y, v2x, v2y ];
 			}
-		}
-		//Handles bouncing off of the container
-		const exceedHorizontal = ( this.x + this.radius > canvas.width ) || ( this.x - this.radius < 0 );
-		const exceedVertical = ( this.y + this.radius > canvas.height ) || ( this.y - this.radius < 0 );
-		// Determines +ve or -ve adjustment based on which wall is touched
-		if ( exceedHorizontal ) {
-			const adj = this.x - this.radius < 0 ? this.x - this.radius : this.x + this.radius - canvas.width;
-			this.x = this.x - adj;
-			this.vx = -this.vx;
-		}
-		if ( exceedVertical ) {
-			const adj = this.y - this.radius < 0 ? this.y - this.radius : this.y + this.radius - canvas.height;
-			this.y = this.y - adj;
-			this.vy = -this.vy;
 		}
 	}
 

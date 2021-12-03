@@ -8,14 +8,14 @@ export class Vector2d {
     return Math.sqrt( this.x ** 2 + this.y ** 2 )
   }
   mult( scalar ) {
-    return new Vector2d( this.x * scalar, this.y * scalar )
+    this.x *= scalar;
+    this.y *= scalar;
   }
   dot( a ) {
-    return new Vector2d( this.x * b.x, + this.y * b.y )
+    return this.x * a.x, + this.y * a.y;
   }
-  static add( ...vtrs ) {
-    vtrs.reduce( ( prev, next ) => {
-      return new Vector2d( prev.x + next.x, prev.y + next.y )
-    } )
+  add( vtr ) {
+    this.x += vtr.x;
+    this.y += vtr.y;
   }
 }

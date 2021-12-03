@@ -1,7 +1,4 @@
-
-const pi = Math.PI;
-
-const particles = [];
+import { pi } from './helpers';
 
 //Restraints on particle properties
 const options = {
@@ -61,4 +58,4 @@ const options = {
 // }
 
 
-export { particles, options };
+export { options };
