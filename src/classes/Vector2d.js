@@ -1,21 +1,36 @@
 
 export class Vector2d {
-  constructor( x, y ) {
+  constructor( x = 0, y = 0 ) {
     this.x = x;
     this.y = y;
   }
   get norm() {
     return Math.sqrt( this.x ** 2 + this.y ** 2 )
   }
-  mult( scalar ) {
+  scale( scalar ) {
     this.x *= scalar;
     this.y *= scalar;
   }
-  dot( a ) {
-    return this.x * a.x, + this.y * a.y;
-  }
-  add( vtr ) {
+  adjust( vtr ) {
     this.x += vtr.x;
     this.y += vtr.y;
+  }
+  perp() {
+    return new Vector2d( -this.y, this.x )
+  }
+  mult( scalar ) {
+    return new Vector2d( this.x * scalar, this.y * scalar );
+  }
+  dot( a ) {
+    return this.x * a.x + this.y * a.y;
+  }
+  add( vtr ) {
+    return new Vector2d( this.x + vtr.x, this.y + vtr.y )
+  }
+  minus( vtr ) {
+    return this.add( vtr.mult( -1 ) );
+  }
+  getUnit() {
+    return this.mult( 1 / this.norm );
   }
 }

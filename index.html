@@ -13,24 +13,17 @@
 
 	<link rel="icon" type="image/png" href="./assets/icon.png">
 	<link rel="stylesheet" type="text/css" href="./src/styles/style.min.css">
-	<script src="./src/scripts/main.js" type="module"></script>
+	<script src="./src/classes/ParticleCanvas.js" type="module"></script>
 </head>
 
 <body>
 	<main>
-		<canvas is='particle-canvas' data-options='{
-				"opacity": 1,
-				"mouseEdges": true,
-				"fill": true,
-				"edges": true,
-				"resolutionModifier": 2,
-				"vicinity": 150
+		<canvas is='particle-canvas' data-canvas-options='{
+				"edgeOpacity": 1,
+				"outline": false,
+				"pixelDensity": 2
 			}' data-particle-options='{
-				"minSpeed": 0.1,
-				"maxSpeed": 2,
-				"minRadius": 5,
-				"maxRadius": 10,
-				"initialParticles": 50
+				"initialParticles": 1
 			}'>
 		</canvas>
 		<form>
