@@ -6,16 +6,15 @@ export class ParticleManager extends EventEmitter {
   constructor( options, width, height ) {
     super()
     const defaultOptions = {
-      minSpeed: 0.5,
-      maxSpeed: 1,
-      minRadius: 5,
-      maxRadius: 20,
-      initialParticles: 1,
-      vicinity: 100
+      minSpeed: 0.2,
+      maxSpeed: 0.5,
+      minRadius: 3,
+      maxRadius: 5,
+      initialParticles: 10,
+      vicinity: 50
     }
     this.particles = []
     this.options = { ...defaultOptions, ...options }
-    console.log( this.options )
     this.bounds = { x: width, y: height }
 
     for ( let i = this.options.initialParticles; i > 0; i-- ) {
@@ -70,9 +69,9 @@ export class ParticleManager extends EventEmitter {
       if ( isOverlap ) {
         const diff = radii - distance;
         const ratio = p.radius / radii;
-        const padj = perpunit.mult( ratio * diff );
+        const padj = perpunit.mult( ( 1 - ratio ) * diff );
         p.position.adjust( padj );
-        const qadj = perpunit.mult( ( 1 - ratio ) * -diff );
+        const qadj = perpunit.mult( ratio * -diff );
         q.position.adjust( qadj );
       }
 
@@ -119,11 +118,9 @@ export class ParticleManager extends EventEmitter {
     const ops = this.options;
     return Math.random() * ( ops.maxSpeed - ops.minSpeed ) + ops.minSpeed;
   }
-  add( x, y ) {
-    const position = new Vector2d( x, y );
+  add( pos = this.randomPosition() ) {
     const speed = this.randomSpeed();
     const radius = this.options.minRadius + ( this.options.maxRadius - this.options.minRadius ) * ( ( speed - this.options.minSpeed ) / ( this.options.maxSpeed - this.options.minSpeed + 0.000001 ) )
-    console.log( radius );
-    this.particles.push( new Particle( position, speed, radius ) );
+    this.particles.push( new Particle( pos, speed, radius ) );
   }
 }

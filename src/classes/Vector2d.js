@@ -7,6 +7,13 @@ export class Vector2d {
   get norm() {
     return Math.sqrt( this.x ** 2 + this.y ** 2 )
   }
+  copy() {
+    return new Vector2d( this.x, this.y )
+  }
+  set( x, y ) {
+    this.x = x;
+    this.y = y;
+  }
   scale( scalar ) {
     this.x *= scalar;
     this.y *= scalar;

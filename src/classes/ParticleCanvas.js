@@ -2,6 +2,7 @@ import { z, Z, zQuery } from '../../modules/zQuery/z-query';
 import { ParticleManager } from './ParticleManager';
 import { pi } from '../scripts/helpers';
 import { Color } from './Color.js';
+import { Vector2d } from './Vector2d';
 zQuery.init( [ 'events' ] );
 
 //Getting the size of the this and assigning it to an object
@@ -10,34 +11,39 @@ export class ParticleCanvas extends HTMLCanvasElement {
 		super()
 		// set up defaults all of them!!!
 		const defaultOptions = {
-			opacity: 0.5,
+			fillOpacity: 0.5,
 			edgeOpacity: 1,
 			mouseEdge: true,
 			fill: true,
+			fillColor: false,
 			outline: false,
+			outlineColor: false,
 			edges: true,
-			pixelDensity: 2
+			pixelDensity: 1
 		}
-		this.width = this.computedStyle( 'width' ).replace( 'px', '' )
-		this.height = this.computedStyle( 'height' ).replace( 'px', '' )
+		const canvasOptions = JSON.parse( this.getAttribute( 'data-canvas-options' ) )
+		const particleOptions = JSON.parse( this.getAttribute( 'data-particle-options' ) )
+		this.options = { ...defaultOptions, ...canvasOptions }
+		this.width = this.computedStyle( 'width' ).replace( 'px', '' ) * this.options.pixelDensity
+		this.height = this.computedStyle( 'height' ).replace( 'px', '' ) * this.options.pixelDensity
 		this.bounds = this.getBoundingClientRect()
 		this.ctx = this.getContext( '2d' )
-		this.ctx.lineCap = "butt";
-		const canvasOptions = JSON.parse( this.getAttribute( 'data-canvas-options' ) );
-		const particleOptions = JSON.parse( this.getAttribute( 'data-particle-options' ) )
-		this.options = { ...defaultOptions, ...canvasOptions };
+		this.ctx.lineCap = "round";
 		this.particleManager = new ParticleManager( particleOptions, this.width, this.height )
+		this.mousePosition = new Vector2d();
+
+		const sizeWatcher = new ResizeObserver( this.createResizeHandler() );
+		sizeWatcher.observe( this );
 
 		this.on( 'optionChange', this.handleOptionChange )
-		this.on( 'resize', this.createResizeHandler(), { 'passive': true } )
-		this.on( 'mousemove', this.createHoverHandler() )
+		this.on( 'resize', this.createResizeHandler(), { passive: true } )
+		this.on( 'mouseenter', this.createMouseEnterHandler() )
+		this.on( 'mousemove', this.createHoverHandler(), { passive: true } )
+		this.on( 'mouseleave', this.createMouseLeaveHandler() )
+		this.particleManager.on( 'inVicinity', this.createInVicinityHandler() )
 		this.on( 'click', e => {
-			this.particleManager.add( e.offsetX, e.offsetY )
+			this.particleManager.add( this.mousePosition.copy() )
 		} )
-		const handleInVicinity = e => {
-			if ( this.options.edges ) this.renderEdge( e.p, e.q );
-		}
-		this.particleManager.on( 'inVicinity', handleInVicinity )
 
 		const renderLoop = () => {
 			this.setUpParticleRendering();
@@ -47,50 +53,75 @@ export class ParticleCanvas extends HTMLCanvasElement {
 			this.particleManager.particles.forEach( p => {
 				this.renderParticle( p );
 			} )
+			this.renderMouseEdges();
 			requestAnimationFrame( renderLoop )
 		}
 		renderLoop()
 	}
+	get area() {
+		return this.width * this.height
+	}
 	createResizeHandler() {
 		let resizeId;
-		return () => {
-			console.log( 'resize' );
-			clearTimeout( resizeId );
-			resizeId = setTimeout( this.resizeCanvas, 300 );
+		return ( entries ) => {
+			entries.forEach( entry => {
+				if ( this !== entry.target ) return;
+				clearTimeout( resizeId );
+				resizeId = setTimeout( this.createResizer(), 200 );
+			} )
 		}
 	}
-	createHoverHandler( options ) {
-		return event => {
-
+	createHoverHandler() {
+		return e => {
+			requestAnimationFrame( () => {
+				const mod = this.options.pixelDensity;
+				this.mousePosition.set( e.offsetX * mod, e.offsetY * mod );
+			} )
+		}
+	}
+	createMouseEnterHandler() {
+		return () => {
+			this.mousePosition[ "active" ] = true;
+		}
+	}
+	createMouseLeaveHandler() {
+		return () => {
+			this.mousePosition[ "active" ] = false;
+		}
+	}
+	createInVicinityHandler() {
+		return e => {
+			if ( this.options.edges ) this.renderEdge( e.p, e.q );
 		}
 	}
 	setUpParticleRendering() {
-		const ctx = this.ctx;
-		ctx.clearRect( 0, 0, this.width, this.height );
-	}
-	area() {
-		return this.width * this.height
+		this.ctx.clearRect( 0, 0, this.width, this.height );
 	}
 	refresh() {
-		this.width = this.computedStyle( 'width' ).replace( 'px', '' ) * ( this.options.pixelDensity || 1 );
-		this.height = this.computedStyle( 'height' ).replace( 'px', '' ) * ( this.options.pixelDensity || 1 );
+		this.width = this.computedStyle( 'width' ).replace( 'px', '' ) * this.options.pixelDensity;
+		this.height = this.computedStyle( 'height' ).replace( 'px', '' ) * this.options.pixelDensity;
 		this.bounds = this.getBoundingClientRect();
 	}
-	resize() {
-		console.log( 'triggered' );
-		const oldCanvasSize = { width: this.width, height: this.height };
-		this.refresh();
+	createResizer() {
+		return () => {
+			const oldCanvasSize = { width: this.width, height: this.height, area: this.area };
+			this.refresh();
 
-		const sizeRatio = this.width / oldCanvasSize.width;
-		options.vicinity *= sizeRatio ** 0.5;
+			const sizeRatio = this.area / oldCanvasSize.area;
+			this.particleManager.options.vicinity *= sizeRatio ** 0.5;
 
-		this.particleManager.particles.forEach( particle => {
-			particle.x = particle.x * ( this.width / oldCanvasSize.width );
-			particle.y = particle.y * ( this.height / oldCanvasSize.height );
-		} )
+			this.particleManager.particles.forEach( p => {
+				p.position.set(
+					p.x * ( this.width / oldCanvasSize.width ),
+					p.y * ( this.height / oldCanvasSize.height )
+				)
+			} )
+			this.particleManager.bounds.x = this.width;
+			this.particleManager.bounds.y = this.height;
 
-		this.height = Math.floor( options.resolutionModifier * this.height );
-		this.width = Math.floor( options.resolutionModifier * this.width );
+			this.height = Math.floor( this.options.pixelDensity * this.height );
+			this.width = Math.floor( this.options.pixelDensity * this.width );
+		}
 	}
 	renderParticle( p ) {
 		const ctx = this.ctx;
@@ -139,25 +170,56 @@ export class ParticleCanvas extends HTMLCanvasElement {
 		ctx.stroke()
 		ctx.globalAlpha = 1;
 	}
-	// if ( options.mouseEdges ) {
-	// 	if ( !mouse.inCanvas() ) return;
-
-	// 	const xDiff = this.x - mouse.cx;
-	// 	if ( xDiff > options.vicinity * 1.5 ) return;
-
-	// 	const yDiff = this.y - mouse.cy;
-	// 	if ( yDiff > options.vicinity * 1.5 ) return;
-
-	// 	const distance = vtr.norm( [ xDiff, yDiff ] );
-	// 	if ( distance < 1.5 * options.vicinity ) {
-	// 		const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
-	// 		ctx.strokeStyle = this.lineColor.rgba( alpha );
-	// 		ctx.lineWidth = this.radius / 2;
-	// 		ctx.beginPath();
-	// 		ctx.moveTo( this.x, this.y );
-	// 		ctx.lineTo( mouse.cx, mouse.cy );
-	// 		ctx.stroke();
-	// 	}
-	// }
+	renderMouseEdges() {
+		if ( !this.mousePosition[ "active" ] ) return
+		this.particleManager.particles.forEach( p => {
+			const distance = p.position.minus( this.mousePosition ).norm;
+			if ( distance > this.particleManager.options.vicinity * 1.5 ) return;
+			const alpha = this.options.edgeOpacity - ( distance / ( ( this.particleManager.options.vicinity * 1.5 ) / this.options.edgeOpacity ) );
+			let edgeColor = '';
+			switch ( true ) {
+				case ( this.options.outlineColor ):
+					edgeColor = this.options.outlineColor;
+					break
+				case ( this.options.outline ):
+					edgeColor = p.lineColor.rgba;
+					break
+				case ( this.options.fillColor ):
+					edgeColor = this.options.fillColor;
+					break
+				default:
+					edgeColor = p.color.rgba;
+			}
+			const ctx = this.ctx;
+			ctx.strokeStyle = edgeColor;
+			ctx.globalAlpha = alpha;
+			ctx.lineWidth = p.radius * 0.8;
+			ctx.beginPath();
+			ctx.moveTo( p.x, p.y );
+			ctx.lineTo( this.mousePosition.x, this.mousePosition.y );
+			ctx.stroke()
+			ctx.globalAlpha = 1;
+		} )
+	}
 }
+// if ( options.mouseEdges ) {
+// 	if ( !mouse.inCanvas() ) return;
+
+// 	const xDiff = this.x - mouse.cx;
+// 	if ( xDiff > options.vicinity * 1.5 ) return;
+
+// 	const yDiff = this.y - mouse.cy;
+// 	if ( yDiff > options.vicinity * 1.5 ) return;
+
+// 	const distance = vtr.norm( [ xDiff, yDiff ] );
+// 	if ( distance < 1.5 * options.vicinity ) {
+// 		const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
+// 		ctx.strokeStyle = this.lineColor.rgba( alpha );
+// 		ctx.lineWidth = this.radius / 2;
+// 		ctx.beginPath();
+// 		ctx.moveTo( this.x, this.y );
+// 		ctx.lineTo( mouse.cx, mouse.cy );
+// 		ctx.stroke();
+// 	}
+// }
 window.customElements.define( 'particle-canvas', ParticleCanvas, { extends: 'canvas' } );

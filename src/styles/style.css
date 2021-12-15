@@ -71,7 +71,6 @@ main > * + * {
   height: 50vh;
   width: 98%;
   background: var(--background);
-  cursor: none;
   box-shadow: var(--box-shadow-alt);
   user-select: none;
   transition: height 400ms;
