@@ -1,9 +1,7 @@
-import { z, Z, zQuery } from '../../modules/zQuery/z-query';
 import { ParticleManager } from './ParticleManager';
 import { pi } from '../scripts/helpers';
 import { Color } from './Color.js';
 import { Vector2d } from './Vector2d';
-zQuery.init( [ 'events' ] );
 
 //Getting the size of the this and assigning it to an object
 export class ParticleCanvas extends HTMLCanvasElement {
@@ -35,13 +33,13 @@ export class ParticleCanvas extends HTMLCanvasElement {
 		const sizeWatcher = new ResizeObserver( this.createResizeHandler() );
 		sizeWatcher.observe( this );
 
-		this.on( 'optionChange', this.handleOptionChange )
-		this.on( 'resize', this.createResizeHandler(), { passive: true } )
-		this.on( 'mouseenter', this.createMouseEnterHandler() )
-		this.on( 'mousemove', this.createHoverHandler(), { passive: true } )
-		this.on( 'mouseleave', this.createMouseLeaveHandler() )
+		this.addEventListener( 'optionChange', this.handleOptionChange )
+		this.addEventListener( 'resize', this.createResizeHandler(), { passive: true } )
+		this.addEventListener( 'mouseenter', this.createMouseEnterHandler() )
+		this.addEventListener( 'mousemove', this.createHoverHandler(), { passive: true } )
+		this.addEventListener( 'mouseleave', this.createMouseLeaveHandler() )
 		this.particleManager.on( 'inVicinity', this.createInVicinityHandler() )
-		this.on( 'click', e => {
+		this.addEventListener( 'click', e => {
 			this.particleManager.add( this.mousePosition.copy() )
 		} )
 
@@ -94,9 +92,6 @@ export class ParticleCanvas extends HTMLCanvasElement {
 			if ( this.options.edges ) this.renderEdge( e.p, e.q );
 		}
 	}
-	setUpParticleRendering() {
-		this.ctx.clearRect( 0, 0, this.width, this.height );
-	}
 	refresh() {
 		this.width = this.computedStyle( 'width' ).replace( 'px', '' ) * this.options.pixelDensity;
 		this.height = this.computedStyle( 'height' ).replace( 'px', '' ) * this.options.pixelDensity;
@@ -122,6 +117,9 @@ export class ParticleCanvas extends HTMLCanvasElement {
 			this.height = Math.floor( this.options.pixelDensity * this.height );
 			this.width = Math.floor( this.options.pixelDensity * this.width );
 		}
+	}
+	setUpParticleRendering() {
+		this.ctx.clearRect( 0, 0, this.width, this.height );
 	}
 	renderParticle( p ) {
 		const ctx = this.ctx;
@@ -201,25 +199,9 @@ export class ParticleCanvas extends HTMLCanvasElement {
 			ctx.globalAlpha = 1;
 		} )
 	}
+	computedStyle( prop ) {
+		return getComputedStyle( this ).getPropertyValue( prop );
+	}
 }
-// if ( options.mouseEdges ) {
-// 	if ( !mouse.inCanvas() ) return;
 
-// 	const xDiff = this.x - mouse.cx;
-// 	if ( xDiff > options.vicinity * 1.5 ) return;
-
-// 	const yDiff = this.y - mouse.cy;
-// 	if ( yDiff > options.vicinity * 1.5 ) return;
-
-// 	const distance = vtr.norm( [ xDiff, yDiff ] );
-// 	if ( distance < 1.5 * options.vicinity ) {
-// 		const alpha = 1 - ( distance / ( 1.5 * options.vicinity ) );
-// 		ctx.strokeStyle = this.lineColor.rgba( alpha );
-// 		ctx.lineWidth = this.radius / 2;
-// 		ctx.beginPath();
-// 		ctx.moveTo( this.x, this.y );
-// 		ctx.lineTo( mouse.cx, mouse.cy );
-// 		ctx.stroke();
-// 	}
-// }
 window.customElements.define( 'particle-canvas', ParticleCanvas, { extends: 'canvas' } );

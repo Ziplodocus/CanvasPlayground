@@ -1,8 +1,6 @@
 import { Color } from './Color';
 import { pi, randomAngleVtr } from '../scripts/helpers';
-import { zQuery } from '../../modules/zQuery/z-query';
 import { EventEmitter } from './EventEmitter';
-zQuery.init( [ 'events' ] );
 
 export class Particle extends EventEmitter {
 	constructor( position, speed, radius ) {
@@ -12,7 +10,6 @@ export class Particle extends EventEmitter {
 		this.color = new Color();
 		this.lineColor = new Color();
 		this.radius = radius;
-
 
 		this.move = () => {
 			this.position.adjust( this.velocity )
