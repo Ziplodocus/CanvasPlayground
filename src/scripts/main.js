@@ -1,6 +1,5 @@
-import { z, Z, zQuery } from '../../modules/zQuery/z-query.js';
-import { ParticleCanvas } from 'particle-web-component';
-const newCanv = new ParticleCanvas();
+import { z, Z, zQuery } from '../modules/zQuery/z-query.js';
+import 'particle-web-component';
 zQuery.init( [ 'events' ] );
 const canvas = z( 'canvas[is="particle-canvas"]' );
 function changeOptions( event ) {

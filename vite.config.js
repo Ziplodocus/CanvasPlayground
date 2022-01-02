@@ -7,6 +7,7 @@ export default defineConfig( ( { command, node } ) => {
 	if ( command === "dev" ) {
 		return {
 			mode: "development",
+			base: "./",
 			build: {
 				sourcemap: true
 			}
@@ -14,6 +15,7 @@ export default defineConfig( ( { command, node } ) => {
 	} else {
 		return {
 			mode: 'production',
+			base: "./",
 			build: {
 				sourcemap: true
 			}

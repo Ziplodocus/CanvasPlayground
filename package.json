@@ -2,7 +2,7 @@
   "name": "particles",
   "version": "1.0.0",
   "description": "Modeled particles enclosed in a canvas",
-  "main": "./src/scripts/main.js",
+  "main": "./src/index.html",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
