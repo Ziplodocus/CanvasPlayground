@@ -2,7 +2,7 @@
   "name": "particles",
   "version": "1.0.0",
   "description": "Modeled particles enclosed in a canvas",
-  "main": "main.js",
+  "main": "./src/scripts/main.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -26,5 +26,8 @@
   "homepage": "https://github.com/Ziplodocus/Particles#readme",
   "devDependencies": {
     "vite": "^2.6.14"
+  },
+  "dependencies": {
+    "particle-web-component": "^1.0.3"
   }
 }
