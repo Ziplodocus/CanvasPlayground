@@ -58,6 +58,7 @@ main {
 	border-radius: 2rem;
 	width: 100%;
 	aspect-ratio: 1;
+	max-height: 80vh;
 	background: var(--primary-background-gradient);
 	cursor: none;
 	box-shadow: var(--box-shadow-alt);
