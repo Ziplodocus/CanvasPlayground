@@ -12,38 +12,75 @@
 	<title>Particles</title>
 
 	<link rel="icon" type="image/png" href="./src/assets/icon.png">
-	<link rel="stylesheet" type="text/css" href="./src/styles/style.min.css">
-	<script src="./src/scripts/main.js" type="module"></script>
+	<link rel="stylesheet" type="text/css" href="./src/styles/style.scss">
+	<script src="./src/scripts/main.ts" type="module"></script>
 </head>
 
 <body>
 	<main>
-		<canvas is='particle-canvas' data-canvas-options='{
-				"edgeOpacity": 1,
-				"fillColor": "#ffffff88"
-			}' data-particle-options='{
-				"initialParticles": 50
-			}'>
-		</canvas>
-		<form>
-			<label class="button">
-				<input name="opacity" type="range" min="0" max="1" step="0.05" value="1">
-				<span>Opacity</span>
+		<particle-canvas></particle-canvas>
+		<form action="">
+			<label class="button range-label">
+				<input class="number-input" name="vicinity" type="number" min="0" step="5" value="50" size="7">
+				<span>vicinity</span>
 			</label>
 
-			<input id="fill" type="checkbox" name="fill" value=true>
-			<label class="button" for="fill">FILL</label>
+			<label class="button label">
+				<input type="number" name="initial-number" value=50 size="5">
+				initial-number
+			</label>
 
-			<input id="outline" type="checkbox" name="outline" value=true>
-			<label class="button" for="outline">OUTLINE</label>
+			<label class="button checkbox-label">
+				<input type="checkbox" name="fill" value=true checked>
+				fill
+			</label>
 
-			<input id="edges" type="checkbox" name="edges" value=true>
-			<label class="button" for="edges">Edges</label>
+			<label class="button checkbox-label">
+				<input type="checkbox" name="outline" value=true>
+				outline
+			</label>
 
-			<input id="mouseEdges" type="checkbox" name="mouseEdges" value=true>
-			<label class="button" for="mouseEdges">Mouse Edges</label>
+			<label class="button checkbox-label">
+				<input type="checkbox" name="edges" value=true checked>
+				edges
+			</label>
 
-			<button type="button" name="reset" value=true>Reset</button>
+			<label class="button checkbox-label">
+				<input type="checkbox" name="mouse-edges" value=true checked>
+				mouse-edges
+			</label>
+
+			<label class="button label">
+				<input type="number" name="min-radius" value=1 size="5" min="0">
+				min-radius
+			</label>
+
+			<label class="button label">
+				<input type="number" name="max-radius" value=5 min="1" size="5">
+				max-radius
+			</label>
+
+			<label class="button label">
+				<input type="number" name="min-speed" value=1 step="0.25" min="0" size="8">
+				min-speed
+			</label>
+
+			<label class="button label">
+				<input type="number" name="max-speed" value=2 step="0.25" min="0" size="8">
+				max-speed
+			</label>
+
+			<label class="button range-label">
+				<input class="range-input" name="fill-opacity" type="range" min="0" max="1" step="0.05" value="0.5">
+				<span>fill-opacity</span>
+			</label>
+
+			<label class="button range-label">
+				<input class="range-input" name="edge-opacity" type="range" min="0" max="1" step="0.05" value="1">
+				<span>edge-opacity</span>
+			</label>
+
+			<input class="button reset-input" type="reset" name="reset">
 		</form>
 	</main>
 </body>

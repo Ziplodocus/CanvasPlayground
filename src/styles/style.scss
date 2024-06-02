@@ -1,68 +1,90 @@
+@import './resets.scss';
+
+%protrude {
+	box-shadow: var(--box-shadow);
+	background: var(--primary-background-gradient);
+	color: var(--color-mid);
+}
+
+%pressable {
+	&:hover {
+		color: var(--color-light);
+	}
+}
+
+%pressed {
+	box-shadow: var(--box-shadow-alt);
+	color: var(--color-light);
+}
 
 :root {
-	--primary: #333;
-	--secondary: #BBB;
-	--primary-grad: #777;
-	--primary-background-gradient: linear-gradient(-20deg, var(--primary), var(--primary-grad));
-	--box-shadow: 
+	--radius-small: 0.75rem;
+	--radius-large: 1rem;
+
+	--color-darker: #222;
+	--color-mid: #BBB;
+	--color-dark: #777;
+	--color-light: #ddd;
+	--color-lightest: #eee;
+	--gradient-dark: linear-gradient(-20deg, var(--color-darker), var(--color-dark));
+
+	--box-shadow:
 		1px 1px 5px rgba(0, 0, 0, 0.6) inset,
 		-1px -1px 5px rgba(255, 255, 255, 0.1) inset,
 		4px 4px 10px rgba(0, 0, 0, 0.8),
 		-4px -4px 10px rgba(255, 255, 255, 0.1);
-	--box-shadow-alt: 
+	--box-shadow-alt:
 		2px 2px 7px rgba(0, 0, 0, 0.6) inset,
 		-2px -2px 7px rgba(255, 255, 255, 0.1) inset,
 		3px 3px 10px rgba(0, 0, 0, 0.8),
 		-3px -3px 10px rgba(255, 255, 255, 0.1);
-	--text-shadow: 
+
+	--text-shadow:
 		1px 1px 2px rgba(0, 0, 0, 0.5),
 		-1px -1px 2px rgba(255, 255, 255, 0.5);
-	--text-shadow-alt: 
+	--text-shadow-alt:
 		1px 1px 2px rgba(0, 0, 0, 0.1),
 		-1px -1px 2px rgba(255, 255, 255, 0.1);
 }
 
-/* Styling resets and new defaults*/
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
-}
 
 html {
 	height: 100vh;
 	font-family: monospace;
-	font-size: 18px;
 	line-height: 1;
 	text-align: center;
-	color: var(--secondary);
-	text-shadow: var(--text-shadow);
+	color: var(--color-light);
+	accent-color: var(--color-lightest);
 }
 
 body {
-	padding: 2vh 2%;
-	background: var(--secondary);
+	font-size: 125%;
+	padding: 2%;
+	background-color: var(--color-lightest);
 }
 
 main {
-	border-radius: 2.5rem;
-	padding: min(5vw, 2rem) min(5%, 2rem) min(3vh, 2rem);
-	background: var(--primary-background-gradient);
+	border-radius: 1rem;
+	padding: min(4%, 3rem);
+	background-image: var(--gradient-dark);
 	box-shadow: var(--box-shadow);
-	> * + * {
+
+	>*+* {
 		margin-top: 1em;
 	}
-} 
+}
 
-[is=particle-canvas] {
-	border-radius: 2rem;
+particle-canvas {
+	@extend %protrude;
+
+	background-color: var(--color-light);
+	display: block;
+	border-radius: 0.75rem;
 	width: 100%;
-	aspect-ratio: 1;
-	max-height: 80vh;
-	background: var(--primary-background-gradient);
-	cursor: none;
-	box-shadow: var(--box-shadow-alt);
+	height: 45vw;
+	max-height: 60vh;
 	user-select: none;
+	overflow: hidden;
 }
 
 form {
@@ -70,47 +92,66 @@ form {
 	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;
-	gap: 1em;
+	gap: 0.75em;
+
+	>* {
+		flex-grow: 1;
+	}
 }
 
-button, .button, [type=button] {
+
+.button,
+[type=button] {
+	@extend %protrude;
+	@extend %pressable;
+
 	position: relative;
-	box-shadow: var(--box-shadow);
-	outline: none;
-	border: none;
-	border-radius: 50rem;
-	background: var(--primary-background-gradient);
-	padding: 0.5em;
+	border-radius: 0.75rem;
+	padding: 0.5em 0.65em;
 	cursor: pointer;
-	font: inherit;
-	font-size: 1.2rem;
-	text-transform: uppercase;
-	color: inherit;
-	text-shadow: inherit;
+	font-size: 110%;
+	// text-transform: uppercase;
+	user-select: none;
+
 	* {
 		vertical-align: middle;
 	}
-	&:hover {
-		color: var();
-	}
+
 	&:active {
-		box-shadow: var(--box-shadow-alt);
-		* {
-			transform: scale(0.98);
-			transform-origin: inherit;
-			cursor: pointer;
-		}
+		@extend %pressed;
 	}
 }
 
-.test {
-	background-color: black;
+.label {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.35em;
 }
 
-input[type="checkbox"] {
-	display: none;
-	&:checked + label {
-		color: var(--primary);
-		text-shadow: var(--text-shadow-alt);
+.checkbox-label {
+	@extend .label;
+
+	&:has(:checked) {
+		@extend %pressed;
 	}
+}
+
+.range-label {
+	@extend .label;
+	flex-wrap: wrap;
+}
+
+.range-input {
+	width: 10ch;
+	max-width: 100%;
+	max-height: 1em;
+}
+
+.reset-input {
+	flex-basis: 100%;
+}
+
+.color-fieldset {
+	border: 1px solid red;
 }

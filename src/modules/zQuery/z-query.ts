@@ -9,5 +9,5 @@ export const zQuery = {
     sliding: sliding,
     events: events,
     style: style,
-    init(options) { options.forEach( option => zQuery[option]() ) }
-}
+    init(options) { options.forEach(option => zQuery[option]()); }
+};

@@ -1,0 +1,50 @@
+.sr-only {
+    border: 0 !important;
+    clip: rect(1px, 1px, 1px, 1px) !important;
+    /* 1 */
+    -webkit-clip-path: inset(50%) !important;
+    clip-path: inset(50%) !important;
+    /* 2 */
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    position: absolute !important;
+    width: 1px !important;
+    white-space: nowrap !important;
+    /* 3 */
+}
+
+/* Styling resets and new defaults*/
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font: inherit;
+    color: inherit;
+    border: none;
+
+}
+
+button {
+    appearance: none;
+    border: none;
+}
+
+[type=number] {
+    appearance: none;
+    font-size: max(85%, 1rem);
+    border: 2px solid currentColor;
+    border-radius: 0.3em;
+    padding-inline: 0.25em 0em;
+    background-color: transparent;
+}
+
+[type=color] {
+    height: 1.2em;
+    width: 1.75em;
+    border-radius: 0.5em;
+    overflow: hidden;
+    border: 1px solid currentColor;
+    cursor: pointer;
+}
