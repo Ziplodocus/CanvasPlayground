@@ -13,22 +13,14 @@
 
 	<link rel="icon" type="image/png" href="./assets/icon.ed4f30c0.png">
 	
-	
-  <script type="module" crossorigin src="./assets/index.e56c895b.js"></script>
-  <link rel="modulepreload" href="./assets/vendor.b72a5394.js">
+	<script src="./src/scripts/main.ts" module></script>
   <link rel="stylesheet" href="./assets/index.9082f01a.css">
 </head>
 
 <body>
 	<main>
-		<canvas is='particle-canvas' data-canvas-options='{
-				"edgeOpacity": 1,
-				"fillColor": "#ffffff88"
-			}' data-particle-options='{
-				"initialParticles": 50
-			}'>
-		</canvas>
-		<form>
+		<particle-canvas fill-color="#ffffff88" initial-number="50"></particle-canvas>
+		<form action="">
 			<label class="button">
 				<input name="opacity" type="range" min="0" max="1" step="0.05" value="1">
 				<span>Opacity</span>
@@ -43,7 +35,7 @@
 			<input id="edges" type="checkbox" name="edges" value=true>
 			<label class="button" for="edges">Edges</label>
 
-			<input id="mouseEdges" type="checkbox" name="mouseEdges" value=true>
+			<input id="mouse-edges" type="checkbox" name="mouseEdges" value=true>
 			<label class="button" for="mouseEdges">Mouse Edges</label>
 
 			<button type="button" name="reset" value=true>Reset</button>
